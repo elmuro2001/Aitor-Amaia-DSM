@@ -1,10 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import CalendarComponent from './components/CalendarioComponent';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Prueba de Amaia</Text>
+      <CalendarComponent />
       <StatusBar style="auto" />
     </View>
   );
