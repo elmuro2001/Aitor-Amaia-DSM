@@ -1,0 +1,15 @@
+ANOTACIONES TRABAJO CALENDARIO DSM.
+    Aitor Muro Perez
+    Amaia Vertiz Conde
+
+12/05/2025
+  Amaia:
+  He estudiado el uso de react-native-calendar. Para conseguir una vista básica es suficiente con importar "Calendar" de 'react-native-calendars' y envolverlo en un View. Luego lo importamos en App.js y lo mostramos. Nos construye la estructura básica del calendario.
+  Ahora voy a estudiar cómo guardar las tareas y eventos, que igual resulta ser más complicado.
+  Por ahora estoy estudiando el uso de AsyncStorage y a ver cómo resulta ¿Se guarda en local de forma permanente?
+  He hecho la prueba y usando el AsyncStorage podemos guardar tareas (esa es la prueba básica que he hecho, donde pones el nombre de tarea y le das a CREAR TAREA y te crea algo básico para confirmar que funciona).
+  Usaremos AsyncStorage para que todo se quede guardado en local. A futuro podemos valorar que se conecte al google calendar o algo por el estilo.
+
+  * Nota: A futuro convendría tomar la "traducción al español" desde alguna librería y no como pone en la documentación de hardcodear los días de la semana y meses.
+          Tengo que estudiar bien dónde se guarda esta info y cómo gestionarla apropiadamente cuando metamos mucha información de tarea, evento etc.
+
