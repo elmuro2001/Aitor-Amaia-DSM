@@ -1,33 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Configuración del idioma para España
-LocaleConfig.locales['es'] = {
-  monthNames: [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ],
-  monthNamesShort: [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-  ],
-  dayNames: [
-    'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
-  ],
-  dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-  today: 'Hoy'
-};
-LocaleConfig.defaultLocale = 'es';
+import '../config/CalendarioConfig';
 
 const CalendarComponent = () => {
   const [tasks, setTasks] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [taskName, setTaskName] = useState('');
+  const [currentMonth, setCurrentMonth] = useState('');
 
-  // Cargar tareas al iniciar la app
+  // Cargar tareas al iniciar la app y establecer el mes actual
   useEffect(() => {
+    const today = new Date();
+    const monthName = today.toLocaleString('default', { month: 'long' });
+    setCurrentMonth(monthName);
+
     const loadTasks = async () => {
       try {
         const storedTasks = await AsyncStorage.getItem('tasks');
@@ -63,15 +51,26 @@ const CalendarComponent = () => {
     };
     setTasks(newTasks);
     saveTasks(newTasks);
-    setTaskName(''); // Limpiar el campo de texto
+    setTaskName('');
+  };
+
+  // Cambiar el mes actual en el header
+  const handleMonthChange = (month) => {
+    const date = new Date(month.dateString);
+    const monthName = date.toLocaleString('default', { month: 'long' });
+    setCurrentMonth(monthName);
   };
 
   return (
     <View>
       <Calendar
-        onDayPress={(day) => {
-          setSelectedDate(day.dateString);
-        }}
+        onDayPress={(day) => setSelectedDate(day.dateString)}
+        onMonthChange={handleMonthChange}
+        renderHeader={() => (
+          <View style={styles.header}>
+            <Text style={styles.headerText}>{currentMonth.toUpperCase()}</Text>
+          </View>
+        )}
         markedDates={{
           ...Object.keys(tasks).reduce((acc, date) => {
             acc[date] = { marked: true, dotColor: 'blue' };
@@ -98,5 +97,20 @@ const CalendarComponent = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    alignItems: 'center',
+    paddingVertical: 18,
+    backgroundColor: '#f5f5f5',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16
+  },
+  headerText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333'
+  }
+});
 
 export default CalendarComponent;
