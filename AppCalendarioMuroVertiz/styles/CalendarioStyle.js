@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import dimensions from '../config/dimensiones';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -10,7 +11,7 @@ export default StyleSheet.create({
     },
     headerContainer: {
         width: '100%',
-        height: 180,
+        height: '20%',
     },
     headerImage: {
         width: screenWidth,
@@ -27,9 +28,8 @@ export default StyleSheet.create({
         color: '#333',
     },
     calendar: {
-        height: screenHeight - 180 - screenHeight * 0.1, // screenHeight - header - footer
-        marginTop: 8,
         marginHorizontal: 16,
+        marginBottom: dimensions.calendarMarginBottom,
         borderRadius: 8,
         overflow: 'hidden',
     },
@@ -60,7 +60,7 @@ export default StyleSheet.create({
         backgroundColor: 'white',
     },
     customHeaderText: {
-        fontSize: 25,
+        fontSize: dimensions.headerText,
         color: '#333',
     },
     yearText: {
@@ -74,16 +74,39 @@ export default StyleSheet.create({
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 3,
     },
-    footer: {
-        height: screenHeight * 0.06, // 10% de la altura de la pantalla
+    /* footer: {
+        height: dimensions.footerHeight, // altura fija, consistente con cálculo
         backgroundColor: '#f2f2f2',
         justifyContent: 'center',
         alignItems: 'center',
         borderTopWidth: 1,
         borderColor: '#ddd',
-    },
+    },*/
     footerText: {
         fontSize: 16,
         color: '#555',
     },
+    wrapper: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    calendarWrapper: {
+        height: dimensions.dayHeight * 7,
+        flexGrow: 1,
+        paddingHorizontal: 0,
+        paddingTop: 0,
+        marginTop: 0,
+    },
+    footer: {
+        height: dimensions.footerHeight,
+        backgroundColor: '#f2f2f2',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderColor: '#ddd',
+        marginBottom: 0,
+        paddingBottom: 0,
+    },
+
 });

@@ -72,28 +72,27 @@ const CalendarComponent = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1, justifyContent: 'space-between' }}>
-        <View>
-          {/* CABECERA CON IMAGEN */}
-          <View style={styles.headerContainer}>
-            <Image
-              source={require('../assets/wallpaper1.jpg')}
-              style={styles.headerImage}
-            />
-            <Text style={styles.yearText}>{currentYear}</Text>
-            <LinearGradient
-              colors={['transparent', 'white']}
-              style={styles.gradient}
-            />
-          </View>
+      <View style={styles.wrapper}>
+        {/* CABECERA */}
+        <View style={styles.headerContainer}>
+          <Image
+            source={require('../assets/wallpaper1.jpg')}
+            style={styles.headerImage}
+          />
+          <Text style={styles.yearText}>{currentYear}</Text>
+          <LinearGradient
+            colors={['transparent', 'white']}
+            style={styles.gradient}
+          />
+        </View>
 
-          {/* CALENDARIO */}
+        {/* CALENDARIO */}
+        <View style={styles.calendarWrapper}>
           <Calendar
             firstDay={1}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             onMonthChange={handleMonthChange}
-            showSixWeeks={true}   // Fuerza siempre 6 semanas visibles
-            hideExtraDays={false} // Para asegurarnos de mostrar días de meses anteriores/siguientes
+            hideExtraDays={false}
             renderHeader={() => (
               <View style={styles.customHeaderContainer}>
                 <Text style={styles.customHeaderText}>{currentMonth}</Text>
@@ -106,8 +105,8 @@ const CalendarComponent = () => {
               }, {}),
               [selectedDate]: { selected: true, selectedColor: '#c9c9c9' },
             }}
-            disableAllTouchEventsForInactiveDays={false} // permite que se pueda pulsar
-            style={[styles.calendar, { marginBottom: dimensions.calendarMarginBottom }]}
+            disableAllTouchEventsForInactiveDays={false}
+            style={styles.calendar}
             theme={{
               todayTextColor: '#00adf5',
               arrowColor: '#333',
@@ -135,7 +134,7 @@ const CalendarComponent = () => {
                   backgroundColor: '#d0f0ff',
                   borderRadius: 8,
                 },
-              }
+              },
             }}
           />
         </View>
@@ -145,24 +144,6 @@ const CalendarComponent = () => {
           <Text style={styles.footerText}>Footer</Text>
         </View>
       </View>
-
-      {/* TAREAS 
-      <ScrollView contentContainerStyle={styles.taskSection}>
-        <Text>Fecha seleccionada: {selectedDate || 'Ninguna'}</Text>
-        <TextInput
-          placeholder="Escribe el nombre de la tarea"
-          value={taskName}
-          onChangeText={setTaskName}
-          style={styles.input}
-        />
-        <Button title="Crear Tarea" onPress={createTask} />
-
-        <Text style={styles.taskTitle}>Tareas guardadas:</Text>
-        {Object.entries(tasks).map(([date, task]) => (
-          <Text key={date}>{`${date}: ${task}`}</Text>
-        ))}
-      </ScrollView> */}
-
     </SafeAreaView>
   );
 };
