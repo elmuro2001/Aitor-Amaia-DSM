@@ -13,6 +13,7 @@ const CalendarComponent = () => {
   const [taskName, setTaskName] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
+  const [refreshFlag, setRefreshFlag] = useState(false);
 
   useEffect(() => {
     const today = new Date();
@@ -41,6 +42,9 @@ const CalendarComponent = () => {
   const handleMonthChange = (month) => {
     const date = new Date(month.year, month.month - 1);
     updateMonthYear(date);
+
+    // Forzar rerender suave. Si no nos daba problemas (sin y con el render)
+    setRefreshFlag(f => !f);
   };
 
   const saveTasks = async (newTasks) => {
@@ -85,9 +89,11 @@ const CalendarComponent = () => {
 
           {/* CALENDARIO */}
           <Calendar
-            firstDay={1} 
+            firstDay={1}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             onMonthChange={handleMonthChange}
+            showSixWeeks={true}   // Fuerza siempre 6 semanas visibles
+            hideExtraDays={false} // Para asegurarnos de mostrar días de meses anteriores/siguientes
             renderHeader={() => (
               <View style={styles.customHeaderContainer}>
                 <Text style={styles.customHeaderText}>{currentMonth}</Text>
@@ -104,16 +110,16 @@ const CalendarComponent = () => {
             style={[styles.calendar, { marginBottom: dimensions.calendarMarginBottom }]}
             theme={{
               todayTextColor: '#00adf5',
-              selectedDayBackgroundColor: '#00adf5',
+              selectedDayBackgroundColor: '#96e3bf',
               arrowColor: '#333',
               textDayFontSize: 16,
               textDayHeaderFontSize: 14,
-              textDisabledColor: '#999999', // <<<<<< Días fuera del mes
+              textDisabledColor: '#999999',
               'stylesheet.day.basic': {
                 base: {
                   width: dimensions.daySize,
                   height: dimensions.dayHeight - 1,
-                  backgroundColor: '#e6e6e6',
+                  backgroundColor: '#f7f7f7',
                   borderRadius: 8,
                   margin: 2,
                   paddingTop: 4,
