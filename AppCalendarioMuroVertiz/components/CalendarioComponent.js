@@ -85,6 +85,7 @@ const CalendarComponent = () => {
 
           {/* CALENDARIO */}
           <Calendar
+            firstDay={1} 
             onDayPress={(day) => setSelectedDate(day.dateString)}
             onMonthChange={handleMonthChange}
             renderHeader={() => (
@@ -99,13 +100,15 @@ const CalendarComponent = () => {
               }, {}),
               [selectedDate]: { selected: true, selectedColor: 'blue' },
             }}
-            style={styles.calendar}
+            disableAllTouchEventsForInactiveDays={false} // permite que se pueda pulsar
+            style={[styles.calendar, { marginBottom: dimensions.calendarMarginBottom }]}
             theme={{
               todayTextColor: '#00adf5',
               selectedDayBackgroundColor: '#00adf5',
               arrowColor: '#333',
               textDayFontSize: 16,
               textDayHeaderFontSize: 14,
+              textDisabledColor: '#999999', // <<<<<< Días fuera del mes
               'stylesheet.day.basic': {
                 base: {
                   width: dimensions.daySize,
@@ -122,6 +125,10 @@ const CalendarComponent = () => {
                   fontSize: 14,
                   color: '#2d4150',
                   textAlign: 'center',
+                },
+                today: {
+                  backgroundColor: '#d0f0ff',
+                  borderRadius: 8,
                 },
               }
             }}
