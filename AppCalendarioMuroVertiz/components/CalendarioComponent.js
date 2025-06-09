@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image, Dimensions, } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image, Dimensions, } from 'react-native';
-import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import '../config/CalendarioConfig';
-import styles from '../styles/CalendarioStyle';
-import dimensions from '../config/dimensiones';
-import GestorActividades from './Actividad';
 import { LinearGradient } from 'expo-linear-gradient';
 import '../config/CalendarioConfig';
 import styles from '../styles/CalendarioStyle';
