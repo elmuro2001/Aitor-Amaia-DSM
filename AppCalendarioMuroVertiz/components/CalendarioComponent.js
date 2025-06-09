@@ -6,9 +6,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import '../config/CalendarioConfig';
 import styles from '../styles/CalendarioStyle';
 import dimensions from '../config/dimensiones';
+import GestorActividades from './Actividad';
 
 const CalendarComponent = () => {
-  const [tasks, setTasks] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [taskName, setTaskName] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
