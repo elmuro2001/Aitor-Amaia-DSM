@@ -57,3 +57,16 @@ Y para marcar periodos y puntos:
 
 Además, he encontrado esta página web donde explica bastante bien el tema de customizar el estilo en react-native-calendar:
 https://medium.com/@wvdelden99/how-to-style-your-calendar-in-react-native-2150196c00bc
+
+
+06/06/2025:
+  Amaia:
+    Hoy se me ha pasado por la cabeza que podría ser un puntazo poder detectar el idioma del teléfono del usuario y 
+    mediante una API o algo por el estilo poder cambiar el idioma del calendario. Aun así, primero voy a acabar con el estilo =).
+
+    Mientras buscaba la forma de poner un estilo de pantalla más completa he visto que con la funcionaidad de agenda podemos hacer lo que queríamos del listado de tareas por día.
+    https://medium.com/@amolakapadi/building-a-customizable-calendar-component-in-react-native-482b082460fc
+
+    
+
+    
