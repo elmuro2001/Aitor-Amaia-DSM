@@ -27,7 +27,7 @@ export default StyleSheet.create({
         color: '#333',
     },
     calendar: {
-        flex: 1,
+        height: screenHeight - 180 - screenHeight * 0.1, // screenHeight - header - footer
         marginTop: 8,
         marginHorizontal: 16,
         borderRadius: 8,
@@ -73,5 +73,17 @@ export default StyleSheet.create({
         textShadowColor: 'rgba(0, 0, 0, 0.7)',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 3,
+    },
+    footer: {
+        height: screenHeight * 0.06, // 10% de la altura de la pantalla
+        backgroundColor: '#f2f2f2',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderColor: '#ddd',
+    },
+    footerText: {
+        fontSize: 16,
+        color: '#555',
     },
 });
