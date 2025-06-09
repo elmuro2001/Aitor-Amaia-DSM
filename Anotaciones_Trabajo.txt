@@ -2,6 +2,8 @@ ANOTACIONES TRABAJO CALENDARIO DSM.
     Aitor Muro Perez
     Amaia Vertiz Conde
 
+** npx expo start --clear **
+
 12/05/2025
   Amaia:
   He estudiado el uso de react-native-calendar. Para conseguir una vista básica es suficiente con importar "Calendar" de 'react-native-calendars' y envolverlo en un View. Luego lo importamos en App.js y lo mostramos. Nos construye la estructura básica del calendario.
@@ -13,3 +15,58 @@ ANOTACIONES TRABAJO CALENDARIO DSM.
   * Nota: A futuro convendría tomar la "traducción al español" desde alguna librería y no como pone en la documentación de hardcodear los días de la semana y meses.
           Tengo que estudiar bien dónde se guarda esta info y cómo gestionarla apropiadamente cuando metamos mucha información de tarea, evento etc.
 
+14/05/2025
+  Amaia: 
+  El lunes estudiamos cómo funciona el calendario react-native-calendar y sabemos que no necesitamos ninguna librería externa para definir los días de la semana, mes y año.
+  Además, vimos que podíamos usar AsyncStorage para almacenar las tareas/eventos en local. 
+
+  AsyncStorage puede entenderse como el equivalente al LocalStorage de web pero para móvil.
+
+  Como ya teníamos esa información, nos hemos dedicado a crear las tareas del proyecto, asignarlas y estimar el tiempo que nos llevarían.
+  Además, hemos pasado las tareas que vamos a empezar del ToDo a "En proceso". Aitor ha pasado mi tarea completada (pendiente de revisión) a Revisada.
+  
+21/05/2025:
+  Amaia: 
+  Mayor parte del tiempo de clase la hemos usado para las presentaciones. Aun así, hemos avanzado:
+
+  Como estaba estudiando temas de diseño, he encontrado esto:
+  <Calendar
+  // Collection of dates that have to be marked. Default = {}
+  markedDates={{
+    '2012-05-16': {selected: true, marked: true, selectedColor: 'blue'},
+    '2012-05-17': {marked: true},
+    '2012-05-18': {marked: true, dotColor: 'red', activeOpacity: 0},
+    '2012-05-19': {disabled: true, disableTouchEvent: true}
+  }}
+/>
+Aquí podemos ver que podemos poner los puntitos los días que hay tareas.
+
+Y para marcar periodos y puntos:
+<Calendar
+  markingType={'period'}
+  markedDates={{
+    '2012-05-15': {marked: true, dotColor: '#50cebb'},
+    '2012-05-16': {marked: true, dotColor: '#50cebb'},
+    '2012-05-21': {startingDay: true, color: '#50cebb', textColor: 'white'},
+    '2012-05-22': {color: '#70d7c7', textColor: 'white'},
+    '2012-05-23': {color: '#70d7c7', textColor: 'white', marked: true, dotColor: 'white'},
+    '2012-05-24': {color: '#70d7c7', textColor: 'white'},
+    '2012-05-25': {endingDay: true, color: '#50cebb', textColor: 'white'}
+  }}
+/>
+
+Además, he encontrado esta página web donde explica bastante bien el tema de customizar el estilo en react-native-calendar:
+https://medium.com/@wvdelden99/how-to-style-your-calendar-in-react-native-2150196c00bc
+
+
+06/06/2025:
+  Amaia:
+    Hoy se me ha pasado por la cabeza que podría ser un puntazo poder detectar el idioma del teléfono del usuario y 
+    mediante una API o algo por el estilo poder cambiar el idioma del calendario. Aun así, primero voy a acabar con el estilo =).
+
+    Mientras buscaba la forma de poner un estilo de pantalla más completa he visto que con la funcionaidad de agenda podemos hacer lo que queríamos del listado de tareas por día.
+    https://medium.com/@amolakapadi/building-a-customizable-calendar-component-in-react-native-482b082460fc
+
+    
+
+    
