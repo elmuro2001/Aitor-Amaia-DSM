@@ -52,7 +52,7 @@ const CalendarComponent = () => {
 
         {/* CALENDARIO */}
         <View style={styles.calendarWrapper}>
-          <Calendar
+          <Calendar 
             firstDay={1}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             onMonthChange={handleMonthChange}
@@ -102,10 +102,10 @@ const CalendarComponent = () => {
 
         {/* FOOTER */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Footer</Text>
+          <Text style={styles.footerText}>Footer</Text> 
         </View>
       </View>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 };
 
