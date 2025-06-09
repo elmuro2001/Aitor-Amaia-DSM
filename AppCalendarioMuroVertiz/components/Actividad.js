@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text,TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, Text,TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Switch } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
@@ -47,6 +47,7 @@ const GestorActividades = ({ selectedDate }) => {
   const [taskdescription, setTaskDescription] = useState('');
   const [taskcolor, setTaskColor] = useState('');
   const [tasklocation, setTaskLocation] = useState('');
+  const [taskDone, setTaskDone] = useState(false); // Nuevo estado para "Hecha"
   const [modalVisible, setModalVisible] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -82,6 +83,7 @@ const GestorActividades = ({ selectedDate }) => {
       description: taskdescription,
       color: taskcolor || 'negro',
       location: tasklocation,
+      done: tasktype === 'tarea' ? taskDone : undefined, // Solo si es tarea
     };
     let newDateTasks;
     if (editIndex !== null) {
@@ -92,11 +94,12 @@ const GestorActividades = ({ selectedDate }) => {
     }
     setTasks({ ...tasks, [selectedDate]: newDateTasks });
     setTaskName('');
-    setTaskHour('');
+    setTaskHour('12:00');
     setTaskType('evento');
     setTaskDescription('');
     setTaskColor('');
     setTaskLocation('');
+    setTaskDone(false);
     setModalVisible(false);
     setEditIndex(null);
   };
@@ -117,8 +120,17 @@ const GestorActividades = ({ selectedDate }) => {
     setTaskDescription(task.description);
     setTaskColor(task.color);
     setTaskLocation(task.location);
+    setTaskDone(task.done || false);
     setEditIndex(index);
     setModalVisible(true);
+  };
+
+    // Cambiar estado "Hecha" desde la lista
+    const toggleDone = (index) => {
+    const dateTasks = tasks[selectedDate] || [];
+    const updatedTasks = [...dateTasks];
+    updatedTasks[index].done = !updatedTasks[index].done;
+    setTasks({ ...tasks, [selectedDate]: updatedTasks });
   };
 
   return (
@@ -126,7 +138,7 @@ const GestorActividades = ({ selectedDate }) => {
       <Text>Fecha seleccionada: {selectedDate || 'Ninguna'}</Text>
       <Button title="Crear Tarea" onPress={() => {
         setTaskName('');
-        setTaskHour('00:00');
+        setTaskHour('12:00');
         setTaskType('evento');
         setTaskDescription('');
         setTaskColor('');
@@ -144,6 +156,15 @@ const GestorActividades = ({ selectedDate }) => {
               <Text>Hora: {item.hour} | Tipo: {item.type}</Text>
               <Text>Descripción: {item.description}</Text>
               <Text>Ubicación: {item.location}</Text>
+              {item.type === 'tarea' && (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text>Hecha: </Text>
+                  <Switch
+                    value={!!item.done}
+                    onValueChange={() => toggleDone(index)}
+                  />
+                </View>
+              )}
             </View>
             <Button title="Editar" onPress={() => startEditTask(index)} />
             <Button title="Borrar" color="red" onPress={() => deleteTask(index)} />
@@ -191,6 +212,12 @@ const GestorActividades = ({ selectedDate }) => {
                 <Picker.Item label="Tarea" value="tarea" />
               </Picker>
             </View>
+            {tasktype === 'tarea' && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                <Text>Hecha: </Text>
+                <Switch value={taskDone} onValueChange={setTaskDone} />
+              </View>
+            )}
             <TextInput
               placeholder="Descripción"
               value={taskdescription}
