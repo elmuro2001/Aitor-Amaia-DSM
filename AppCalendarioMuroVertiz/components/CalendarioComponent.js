@@ -104,13 +104,12 @@ const CalendarComponent = () => {
                 acc[date] = { marked: true, dotColor: 'blue' };
                 return acc;
               }, {}),
-              [selectedDate]: { selected: true, selectedColor: 'blue' },
+              [selectedDate]: { selected: true, selectedColor: '#c9c9c9' },
             }}
             disableAllTouchEventsForInactiveDays={false} // permite que se pueda pulsar
             style={[styles.calendar, { marginBottom: dimensions.calendarMarginBottom }]}
             theme={{
               todayTextColor: '#00adf5',
-              selectedDayBackgroundColor: '#96e3bf',
               arrowColor: '#333',
               textDayFontSize: 16,
               textDayHeaderFontSize: 14,
