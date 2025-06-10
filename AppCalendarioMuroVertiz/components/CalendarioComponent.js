@@ -102,6 +102,9 @@ const CalendarComponent = () => {
 
             // Importamos el tema del calendario
             theme={CalendarioTheme}
+
+            // Habilitamos el swipe para cambiar de mes
+            enableSwipeMonths={true}
           />
         </View>
 
