@@ -205,11 +205,11 @@ const GestorActividades = ({ selectedDate }) => {
 
       <View
         style={{
-          height: dimensiones.dayHeight * 2, // 2 filas + margen opcional
+          height: dimensiones.dayHeight * 2, 
           marginRight: 80,
           marginLeft: 10,
           marginTop: 10,
-          marginBottom: 2, // deja espacio para el botón flotante
+          marginBottom: 2,
           backgroundColor: '#fff',
           borderRadius: 12,
           elevation: 2,
