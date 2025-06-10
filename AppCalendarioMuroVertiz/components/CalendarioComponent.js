@@ -14,10 +14,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const CalendarComponent = () => {
   // Constantes y estados 
+  const [tasks, setTasks] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
   const [refreshFlag, setRefreshFlag] = useState(false);
+
+
 
   // Cargamos el mes y año actual al iniciar el componente
   useEffect(() => {
@@ -41,6 +44,26 @@ const CalendarComponent = () => {
     // Forzar rerender suave para evitar problemas de renderizado
     setRefreshFlag(f => !f);
   };
+
+  // Construir markedDates con dots de colores
+  const markedDates = {};
+  Object.entries(tasks).forEach(([date, actividades]) => {
+    if (actividades.length > 0) {
+      markedDates[date] = {
+        marked: true,
+        dots: actividades.map(act => ({
+          key: act.name,
+          color: act.color || '#000',
+        })),
+        // Resaltar el seleccionado:
+        ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
+      };
+    }
+  });
+  // Si no hay dots para el día seleccionado, márcalo igualmente
+  if (selectedDate && !markedDates[selectedDate]) {
+    markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -91,9 +114,8 @@ const CalendarComponent = () => {
             )}
 
             // Configuración fecha seleccionada
-            markedDates={{
-              [selectedDate]: { selected: true, selectedColor: '#c9c9c9' },
-            }}
+            markedDates={markedDates}
+            markingType="multi-dot"
 
             disableAllTouchEventsForInactiveDays={false}
 
@@ -105,12 +127,18 @@ const CalendarComponent = () => {
 
             // Habilitamos el swipe para cambiar de mes
             enableSwipeMonths={true}
+
+
           />
         </View>
 
         {/* GESTOR RE ACTIVIDADES */}
         <View>
-          <GestorActividades selectedDate={selectedDate} />
+          <GestorActividades
+            selectedDate={selectedDate}
+            tasks={tasks}
+            setTasks={setTasks}
+          />
         </View>
 
         {/* FOOTER */}
