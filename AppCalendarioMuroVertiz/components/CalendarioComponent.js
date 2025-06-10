@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image, } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import '../config/CalendarioConfig';
-import styles from '../styles/CalendarioStyle';
+
 import GestorActividades from './Actividad';
+import '../config/CalendarioConfig';
+
+import styles from '../styles/CalendarioStyle';
 import CalendarioTheme from '../styles/CalendarioTheme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 const CalendarComponent = () => {
@@ -35,7 +37,7 @@ const CalendarComponent = () => {
   const handleMonthChange = (month) => {
     const date = new Date(month.year, month.month - 1);
     updateMonthYear(date);
-    
+
     // Forzar rerender suave para evitar problemas de renderizado
     setRefreshFlag(f => !f);
   };
