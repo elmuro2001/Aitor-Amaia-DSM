@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text,TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert, Animated, Easing } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
+import styles from '../styles/CalendarioStyle';
 
 // Paleta de colores
 const COLORS = [
@@ -37,7 +40,6 @@ const ColorPicker = ({ selectedColor, onSelect }) => (
   </View>
 );
 
-
 //Componenete
 const GestorActividades = ({ selectedDate }) => {
   const [tasks, setTasks] = useState({});
@@ -52,6 +54,33 @@ const GestorActividades = ({ selectedDate }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [error, setError] = useState('');
+  const [showOptions, setShowOptions] = useState(false);
+  const [animation] = useState(new Animated.Value(0));
+
+  // Animación para el botón de opciones
+  const toggleOptions = () => {
+    const toValue = showOptions ? 0 : 1;
+    Animated.spring(animation, {
+      toValue,
+      useNativeDriver: true,
+      friction: 5,
+    }).start();
+    setShowOptions(!showOptions);
+  };
+
+  // Función para abrir el modal con la actividada específica
+  const handleCreate = (type) => {
+    setTaskName('');
+    setTaskHour('12:00');
+    setTaskType(type);
+    setTaskDescription('');
+    setTaskColor('');
+    setTaskLocation('');
+    setEditIndex(null);
+    setModalVisible(true);
+    toggleOptions(); // ocultar opciones otra vez
+  };
+
 
   // Mostrar el selector de hora
   const onChangeTime = (event, selectedDate) => {
@@ -123,17 +152,56 @@ const GestorActividades = ({ selectedDate }) => {
 
   return (
     <View>
-      <Text>Fecha seleccionada: {selectedDate || 'Ninguna'}</Text>
-      <Button title="Crear Tarea" onPress={() => {
-        setTaskName('');
-        setTaskHour('00:00');
-        setTaskType('evento');
-        setTaskDescription('');
-        setTaskColor('');
-        setTaskLocation('');
-        setEditIndex(null);
-        setModalVisible(true);
-      }} />
+      <TouchableOpacity style={styles.fab} onPress={toggleOptions}>
+        <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
+      </TouchableOpacity>
+
+      <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
+        {/* Botón para crear tarea */}
+        {showOptions && (
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  translateY: animation.interpolate({ inputRange: [0, 15], outputRange: [0, -130],
+                  }),
+                },
+              ],
+              opacity: animation,
+              marginBottom: 0,
+            }}
+          >
+            <TouchableOpacity
+              style={[styles.fabOption, { backgroundColor: '#4CAF50' }]}
+              onPress={() => handleCreate('tarea')}
+            >
+              <MaterialIcons name="assignment" size={20} color="#fff" />
+              <Text style={{ color: '#fff', marginLeft: 5 }}>Tarea</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* Botón para crear evento */}
+        {showOptions && (
+          <Animated.View
+            style={{
+              transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, -100] }) }],
+              opacity: animation,
+              marginBottom: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={[styles.fabOption, { backgroundColor: '#2196F3' }]}
+              onPress={() => handleCreate('evento')}
+            >
+              <MaterialIcons name="event" size={20} color="#fff" />
+              <Text style={{ color: '#fff', marginLeft: 5 }}>Evento</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </View>
+
+
       <FlatList
         data={tasks[selectedDate] || []}
         keyExtractor={(_, idx) => idx.toString()}
@@ -159,7 +227,7 @@ const GestorActividades = ({ selectedDate }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text>{editIndex !== null ? 'Editar' : 'Crear'} tarea para {selectedDate}</Text>
-            {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}       
+            {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}
             <TextInput
               placeholder="Nombre de la tarea"
               value={taskName}
@@ -213,47 +281,5 @@ const GestorActividades = ({ selectedDate }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)'
-  },
-  modalContent: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    elevation: 5
-  },
-  input: {
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    padding: 5
-  },
-    colorPickerContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 10,
-    gap: 8,
-  },
-  colorCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    margin: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#333',
-    opacity: 0.5,
-  },
-});
 
 export default GestorActividades;

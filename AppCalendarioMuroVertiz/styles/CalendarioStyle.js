@@ -102,23 +102,72 @@ export default StyleSheet.create({
     },
     taskManagerOverlay: {
         position: 'absolute',
-        bottom: dimensions.dimensionesCreadorTarea, // justo encima del footer
-        left: 0,
+        bottom: dimensions.dimensionesCreadorTarea - 10,
         right: 0,
         backgroundColor: 'white',
-        padding: 10,
+        padding: 0,
         borderTopWidth: 1,
-        borderColor: '#ccc',
-        zIndex: 10,
+        borderColor: '#fff',
+        zIndex: 0,
     },
-    /*
-    taskManagerOverlay: {
+    fab: {
         position: 'absolute',
-        bottom: dimensions.footerHeight, // justo encima del footer
-        left: 0,
-        right: 0,
+        bottom: 20,
+        right: 20,
+        backgroundColor: '#007BFF',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+    },
+    fabOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 20,
+        elevation: 2,
+        right: 30,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.3)'
+    },
+    modalContent: {
+        margin: 20,
         backgroundColor: 'white',
-        padding: 10,
-        zIndex: 10, // asegura que esté encima del calendario si se superponen
-    }, */
+        borderRadius: 10,
+        padding: 20,
+        elevation: 5
+    },
+    input: {
+        borderBottomWidth: 1,
+        marginBottom: 10,
+        padding: 5
+    },
+    colorPickerContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginVertical: 10,
+        gap: 8,
+    },
+    colorCircle: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        borderWidth: 2,
+        margin: 4,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    selectedCircle: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: '#333',
+        opacity: 0.5,
+    },
 });
