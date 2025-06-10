@@ -77,6 +77,7 @@ https://medium.com/@wvdelden99/how-to-style-your-calendar-in-react-native-215019
     He arreglado el estilo para que siempre aparezca el botón de evento. He añadido que el botón de crear evento sea un botón con un '+'.
     Al hacer click al botón '+' Nos da la opción de 'Evento' o 'Tarea'. En el modal se seleccionará por defecto el elegido por el usuario.
     
+    He pasado el theme del calendario a un js en styles para un manejo más sencillo de estilos.
     
 
     

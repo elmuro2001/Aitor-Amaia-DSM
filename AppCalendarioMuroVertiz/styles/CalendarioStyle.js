@@ -100,16 +100,6 @@ export default StyleSheet.create({
         marginBottom: 0,
         paddingBottom: 0,
     },
-    taskManagerOverlay: {
-        position: 'absolute',
-        bottom: dimensions.dimensionesCreadorTarea - 10,
-        right: 0,
-        backgroundColor: 'white',
-        padding: 0,
-        borderTopWidth: 1,
-        borderColor: '#fff',
-        zIndex: 0,
-    },
     fab: {
         position: 'absolute',
         bottom: 20,
