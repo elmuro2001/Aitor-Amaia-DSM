@@ -41,8 +41,7 @@ const ColorPicker = ({ selectedColor, onSelect }) => (
 );
 
 //Componenete
-const GestorActividades = ({ selectedDate }) => {
-  const [tasks, setTasks] = useState({});
+const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [taskName, setTaskName] = useState('');
   const [taskhour, setTaskHour] = useState('');
   const [tasktype, setTaskType] = useState('evento'); // Por defecto "evento"
