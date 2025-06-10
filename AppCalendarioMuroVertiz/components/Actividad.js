@@ -203,7 +203,7 @@ const GestorActividades = ({ selectedDate }) => {
               <MaterialIcons name="event" size={20} color="#fff" />
               <Text style={{ color: '#fff', marginLeft: 5 }}>Evento</Text>
             </TouchableOpacity>
-          </Animated.View>
+          </Animated.View> 
         )}
       </View>
 
