@@ -200,8 +200,6 @@ const GestorActividades = ({ selectedDate }) => {
           </Animated.View>
         )}
       </View>
-
-
       <FlatList
         data={tasks[selectedDate] || []}
         keyExtractor={(_, idx) => idx.toString()}
