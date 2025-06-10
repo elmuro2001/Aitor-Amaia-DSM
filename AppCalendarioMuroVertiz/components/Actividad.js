@@ -5,6 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 import styles from '../styles/CalendarioStyle';
+import dimensiones from '../config/dimensiones';
 
 // Paleta de colores
 const COLORS = [
@@ -163,7 +164,8 @@ const GestorActividades = ({ selectedDate }) => {
             style={{
               transform: [
                 {
-                  translateY: animation.interpolate({ inputRange: [0, 15], outputRange: [0, -130],
+                  translateY: animation.interpolate({
+                    inputRange: [0, 15], outputRange: [0, -130],
                   }),
                 },
               ],
@@ -200,22 +202,61 @@ const GestorActividades = ({ selectedDate }) => {
           </Animated.View>
         )}
       </View>
-      <FlatList
-        data={tasks[selectedDate] || []}
-        keyExtractor={(_, idx) => idx.toString()}
-        renderItem={({ item, index }) => (
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 2 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: 'bold', color: item.color || 'black' }}>{item.name}</Text>
-              <Text>Hora: {item.hour} | Tipo: {item.type}</Text>
-              <Text>Descripción: {item.description}</Text>
-              <Text>Ubicación: {item.location}</Text>
+
+      <View
+        style={{
+          height: dimensiones.dayHeight * 2, // 2 filas + margen opcional
+          marginRight: 80,
+          marginLeft: 10,
+          marginTop: 10,
+          marginBottom: 2, // deja espacio para el botón flotante
+          backgroundColor: '#fff',
+          borderRadius: 12,
+          elevation: 2,
+          padding: 8,
+          overflow: 'hidden',
+        }}
+      >
+        <FlatList
+          contentContainerStyle={{ paddingRight: 20 }}
+          data={tasks[selectedDate] || []}
+          keyExtractor={(_, idx) => idx.toString()}
+          renderItem={({ item, index }) => (
+            <View
+              style={{
+                backgroundColor: '#f5f5f5',
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#d1d1d1',
+                padding: 10,
+                marginBottom: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                shadowColor: '#000',
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+                elevation: 1,
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
+                  {item.name}
+                </Text>
+                <Text style={{ color: '#666', fontSize: 14 }}>
+                  {item.hour}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
+                <Ionicons name="pencil" size={22} color="#2196F3" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteTask(index)}>
+                <Ionicons name="trash" size={22} color="red" />
+              </TouchableOpacity>
             </View>
-            <Button title="Editar" onPress={() => startEditTask(index)} />
-            <Button title="Borrar" color="red" onPress={() => deleteTask(index)} />
-          </View>
-        )}
-      />
+          )}
+        />
+      </View>
+
       <Modal
         visible={modalVisible}
         animationType="slide"
