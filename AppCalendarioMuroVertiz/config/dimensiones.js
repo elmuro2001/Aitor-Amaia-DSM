@@ -18,7 +18,9 @@ const calendarMarginBottom = (availableHeightInitial / 4 - 4) * marginBottomFact
 
 const availableHeightFinal = availableHeightInitial - calendarMarginBottom;
 
-const dayHeight = (availableHeightFinal / 7) - 4;
+const dayHeight = (availableHeightFinal / 8) - 4;
+
+const dimensionesCreadorTarea  =  calendarMarginBottom - dayHeight - (dayHeight/2);
 
 export default {
   screenWidth,
@@ -32,4 +34,5 @@ export default {
   daySize,
   dayHeight,
   headerText,
+  dimensionesCreadorTarea,
 };
