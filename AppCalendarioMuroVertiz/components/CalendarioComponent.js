@@ -35,7 +35,7 @@ const CalendarComponent = () => {
   const handleMonthChange = (month) => {
     const date = new Date(month.year, month.month - 1);
     updateMonthYear(date);
-
+    
     // Forzar rerender suave para evitar problemas de renderizado
     setRefreshFlag(f => !f);
   };
