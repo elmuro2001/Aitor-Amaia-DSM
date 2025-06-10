@@ -157,6 +157,10 @@ const GestorActividades = ({ selectedDate }) => {
         <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.fab} onPress={toggleOptions}>
+        <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
+      </TouchableOpacity>
+
       <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
         {/* Botón para crear tarea */}
         {showOptions && (
@@ -205,16 +209,16 @@ const GestorActividades = ({ selectedDate }) => {
 
       <View
         style={{
-          height: dimensiones.dayHeight * 2, 
+          height: ((dimensiones.dayHeight + 4) * 2), // 4 es la distancia entre los bloques de una semana y otra
           marginRight: 80,
           marginLeft: 10,
           marginTop: 10,
           marginBottom: 2,
           backgroundColor: '#fff',
           borderRadius: 12,
-          elevation: 2,
           padding: 8,
           overflow: 'hidden',
+          elevation: 10,
         }}
       >
         <FlatList
