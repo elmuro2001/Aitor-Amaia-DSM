@@ -11,7 +11,7 @@ import CalendarioTheme from '../styles/CalendarioTheme';
 
 
 const CalendarComponent = () => {
-  // Constantes y estados
+  // Constantes y estados 
   const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
