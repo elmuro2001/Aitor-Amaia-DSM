@@ -54,7 +54,9 @@ const CalendarComponent = () => {
         <View style={styles.calendarWrapper}>
           <Calendar
             firstDay={1}
-            onDayPress={(day) => setSelectedDate(day.dateString)}
+            onDayPress={(day) => {
+              setSelectedDate(prev => prev === day.dateString ? '' : day.dateString);
+            }}
             onMonthChange={handleMonthChange}
             hideExtraDays={false}
             renderHeader={() => (
