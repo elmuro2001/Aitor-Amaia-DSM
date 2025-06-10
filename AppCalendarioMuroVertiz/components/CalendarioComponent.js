@@ -52,7 +52,7 @@ const CalendarComponent = () => {
 
         {/* CALENDARIO */}
         <View style={styles.calendarWrapper}>
-          <Calendar 
+          <Calendar
             firstDay={1}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             onMonthChange={handleMonthChange}
@@ -97,17 +97,22 @@ const CalendarComponent = () => {
               },
             }}
           />
-          <GestorActividades selectedDate={selectedDate} />
+
+          {/* GestorActividades (posición fija sobre el footer) */}
+          <View style={styles.taskManagerOverlay}>
+            <GestorActividades selectedDate={selectedDate} />
+          </View>
+
         </View>
 
         {/* FOOTER */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Footer</Text> 
+          <Text style={styles.footerText}>Footer</Text>
         </View>
+
       </View>
-    </SafeAreaView> 
+    </SafeAreaView>
   );
 };
 
 export default CalendarComponent;
-

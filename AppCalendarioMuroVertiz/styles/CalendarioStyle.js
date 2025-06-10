@@ -100,5 +100,25 @@ export default StyleSheet.create({
         marginBottom: 0,
         paddingBottom: 0,
     },
-
+    taskManagerOverlay: {
+        position: 'absolute',
+        bottom: dimensions.dimensionesCreadorTarea, // justo encima del footer
+        left: 0,
+        right: 0,
+        backgroundColor: 'white',
+        padding: 10,
+        borderTopWidth: 1,
+        borderColor: '#ccc',
+        zIndex: 10,
+    },
+    /*
+    taskManagerOverlay: {
+        position: 'absolute',
+        bottom: dimensions.footerHeight, // justo encima del footer
+        left: 0,
+        right: 0,
+        backgroundColor: 'white',
+        padding: 10,
+        zIndex: 10, // asegura que esté encima del calendario si se superponen
+    }, */
 });
