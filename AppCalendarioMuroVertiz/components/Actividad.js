@@ -66,6 +66,12 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [isRange, setIsRange] = useState(false);
   const [taskhourEnd, setTaskHourEnd] = useState('');
   const [whichTime, setWhichTime] = useState('start');
+  const [startDate, setStartDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
+  const [endDate, setEndDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
+  const [showHourPicker, setShowHourPicker] = useState(false);
+  const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -82,14 +88,19 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const handleCreate = (type) => {
     setTaskName('');
     setTaskHour('12:00');
+    setTaskHourEnd('');
+    setIsRange(false);
     setTaskType(type);
     setTaskDescription('');
     setTaskColor('#000000');
     setTaskLocation('');
     setTaskDone(false);
     setEditIndex(null);
+    const baseDate = selectedDate ? new Date(selectedDate) : new Date();
+    setStartDate(baseDate);
+    setEndDate(baseDate);
     setModalVisible(true);
-    toggleOptions(); // ocultar opciones otra vez
+    toggleOptions();
   };
 
   // Mostrar el selector de hora
@@ -103,8 +114,8 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Crear o editar tarea con todas las propiedades
-  const saveTask = async () => {
-    if (!selectedDate) {
+  const saveTask = () => {
+    if (!startDate) {
       setError('Selecciona una fecha antes de guardar la tarea.');
       return;
     }
@@ -114,15 +125,39 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     }
     setError('');
     const dateTasks = tasks[selectedDate] || [];
+
+    // --- Lógica para fecha de fin por defecto ---
+    let realEndDate = endDate;
+    if (isRange && taskhour && taskhourEnd) {
+      const [h1, m1] = taskhour.split(':').map(Number);
+      const [h2, m2] = taskhourEnd.split(':').map(Number);
+      if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+        // Si la hora de fin es menor o igual que la de inicio, suma un día
+        realEndDate = new Date(startDate);
+        realEndDate.setDate(realEndDate.getDate() + 1);
+      } else {
+        // Si no, iguala endDate a startDate
+        realEndDate = startDate;
+      }
+    } else if (isRange) {
+      // Si el usuario no ha tocado nada, endDate debe ser igual a startDate
+      realEndDate = startDate;
+    } else {
+      realEndDate = null;
+    }
+
     const newTask = {
       name: taskName,
-      hour: isRange && taskhourEnd ? `${taskhour} - ${taskhourEnd}` : taskhour,
       type: tasktype,
       description: taskdescription,
       color: taskcolor || 'Negro',
       location: tasklocation,
-      ...(tasktype === 'tarea' ? { done: taskDone } : {}),
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
+      startHour: taskhour,
+      endHour: isRange ? taskhourEnd : null,
     };
+
     let newDateTasks;
     if (editIndex !== null) {
       newDateTasks = [...dateTasks];
@@ -181,6 +216,11 @@ const deleteTask = async (index) => {
     setTaskDone(task.done || false);
     setEditIndex(index);
     setModalVisible(true);
+    setStartDate(task.startDate ? new Date(task.startDate) : new Date());
+    setEndDate(task.endDate ? new Date(task.endDate) : new Date());
+    setTaskHour(task.startHour || '');
+    setTaskHourEnd(task.endHour || '');
+    setIsRange(!!task.endHour);
   };
 
   // Mostrar modal de solo vista
@@ -235,18 +275,28 @@ const deleteTask = async (index) => {
                   <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
                     {item.name}
                   </Text>
-                  {item.type === 'evento' && item.hour ? (
+                  {item.type === 'evento' && item.startDate && item.startHour && (
                     <Text style={{ color: '#666', fontSize: 14 }}>
-                      {item.hour}
+                      {(() => {
+                        const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                        const startD = new Date(item.startDate);
+                        const endD = item.endDate ? new Date(item.endDate) : null;
+                        const sameDay = endD && startD.toDateString() === endD.toDateString();
+
+                        if (item.endHour && endD) {
+                          if (sameDay) {
+                            return `${item.startHour} - ${item.endHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                          } else {
+                            return `${item.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]} - ${item.endHour} ${dias[endD.getDay()]}, ${endD.getDate()} ${meses[endD.getMonth()]}`;
+                          }
+                        } else {
+                          return `${item.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                        }
+                      })()}
                     </Text>
-                  ) : null}
+                  )}
                 </View>
-                <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
-                  <Ionicons name="pencil" size={22} color="#2196F3" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteTask(index)}>
-                  <Ionicons name="trash" size={22} color="red" />
-                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           )}
@@ -343,19 +393,30 @@ const deleteTask = async (index) => {
                   {viewTask.name ? (
                     <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
                   ) : null}
-                  {viewTask.type === 'evento' && viewTask.hour ? (
+                  {viewTask.type === 'evento' && viewTask.startDate && viewTask.startHour && (
                     <Text style={{ marginBottom: 10 }}>
-                      {viewTask.hour}
-                      {selectedDate
-                        ? (() => {
-                          const dateObj = new Date(selectedDate);
-                          const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-                          const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-                          return ` ${dias[dateObj.getDay()]}, ${dateObj.getDate()} ${meses[dateObj.getMonth()]}`;
-                        })()
-                        : ''}
+                      {(() => {
+                        const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                        const startD = new Date(viewTask.startDate);
+                        const endD = viewTask.endDate ? new Date(viewTask.endDate) : null;
+                        const sameDay = endD && startD.toDateString() === endD.toDateString();
+
+                        if (viewTask.endHour && endD) {
+                          if (sameDay) {
+                            // Mismo día: 12:00 - 13:00 mié, 11 jun
+                            return `${viewTask.startHour} - ${viewTask.endHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                          } else {
+                            // Distinto día: 12:00 mié, 11 jun - 13:00 jue, 12 jun
+                            return `${viewTask.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]} - ${viewTask.endHour} ${dias[endD.getDay()]}, ${endD.getDate()} ${meses[endD.getMonth()]}`;
+                          }
+                        } else {
+                          // Solo una hora: 12:00 mié, 11 jun
+                          return `${viewTask.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                        }
+                      })()}
                     </Text>
-                  ) : null}
+                  )}
                   {viewTask.description ? (
                     <View
                       style={{
@@ -411,62 +472,190 @@ const deleteTask = async (index) => {
               style={styles.input}
             />
 
-            {/* Dentro del render del modal de edición/creación */}
             {tasktype === 'evento' && (
               <View style={{ marginBottom: 10 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                  <Text>¿Rango?</Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (!isRange && taskhour) {
-                        // Suma 1 hora a la hora de inicio
-                        const [h, m] = taskhour.split(':').map(Number);
-                        const endHour = (h + 1) % 24;
-                        const endStr = `${endHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                        setTaskHourEnd(endStr);
-                      }
-                      setIsRange(!isRange);
-                    }}
-                    style={{
-                      marginLeft: 10,
-                      backgroundColor: isRange ? '#2196F3' : '#ccc',
-                      borderRadius: 12,
-                      paddingHorizontal: 12,
-                      paddingVertical: 4,
-                    }}
-                  >
-                    <Text style={{ color: '#fff' }}>{isRange ? 'Sí' : 'No'}</Text>
-                  </TouchableOpacity>
+                {/* Hora y Rango de horas */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between' }}>
+                  <Text>Hora</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 8 }}>Rango de horas</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (!isRange) {
+                          setEndDate(startDate);
+                          if (taskhour) {
+                            // Suma 1 hora a la hora de inicio actual
+                            const [h, m] = taskhour.split(':').map(Number);
+                            const endHour = (h + 1) % 24;
+                            const endStr = `${endHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                            setTaskHourEnd(endStr);
+                          } else {
+                            setTaskHourEnd('13:00');
+                          }
+                        }
+                        setIsRange(!isRange);
+                      }}
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderWidth: 2,
+                        borderColor: '#2196F3',
+                        borderRadius: 4,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: isRange ? '#2196F3' : '#fff',
+                      }}
+                    >
+                      {isRange && (
+                        <View style={{
+                          width: 14,
+                          height: 14,
+                          backgroundColor: '#fff',
+                          borderRadius: 2,
+                        }} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <Button
-                  title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
-                  onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
-                />
+
+                {/* Si NO es rango, solo muestra una fila con fecha y hora */}
+                {!isRange && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                      }}
+                      onPress={() => { setDatePickerMode('start'); setShowDatePicker(true); }}
+                    >
+                      <Text>
+                        {startDate
+                          ? (() => {
+                            const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                            const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                            return `${dias[startDate.getDay()]}, ${startDate.getDate()} ${meses[startDate.getMonth()]}`;
+                          })()
+                          : 'Fecha'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                      }}
+                      onPress={() => { setHourPickerMode('start'); setShowHourPicker(true); }}
+                    >
+                      <Text>{taskhour || 'Hora'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Si es rango, muestra Desde y Hasta */}
                 {isRange && (
-                  <Button
-                    title={taskhourEnd ? `Hora fin: ${taskhourEnd}` : "Seleccionar hora fin"}
-                    onPress={() => { setWhichTime('end'); setShowTimePicker(true); }}
+                  <>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5 }}>Desde</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                        }}
+                        onPress={() => { setDatePickerMode('start'); setShowDatePicker(true); }}
+                      >
+                        <Text>
+                          {startDate
+                            ? (() => {
+                              const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                              const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                              return `${dias[startDate.getDay()]}, ${startDate.getDate()} ${meses[startDate.getMonth()]}`;
+                            })()
+                            : 'Fecha'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                        }}
+                        onPress={() => { setHourPickerMode('start'); setShowHourPicker(true); }}
+                      >
+                        <Text>{taskhour || 'Hora'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5 }}>Hasta</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                        }}
+                        onPress={() => { setDatePickerMode('end'); setShowDatePicker(true); }}
+                      >
+                        <Text>
+                          {endDate
+                            ? (() => {
+                              const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                              const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                              return `${dias[endDate.getDay()]}, ${endDate.getDate()} ${meses[endDate.getMonth()]}`;
+                            })()
+                            : 'Fecha'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                        }}
+                        onPress={() => { setHourPickerMode('end'); setShowHourPicker(true); }}
+                      >
+                        <Text>{taskhourEnd || 'Hora'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+
+                {/* DateTimePickers */}
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={datePickerMode === 'start' ? startDate : endDate}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        if (datePickerMode === 'start') setStartDate(selectedDate);
+                        else setEndDate(selectedDate);
+                      }
+                    }}
                   />
                 )}
-                {showTimePicker && (
+                {showHourPicker && (
                   <DateTimePicker
                     value={
-                      whichTime === 'start'
-                        ? (taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date())
-                        : (taskhourEnd ? new Date(`1970-01-01T${taskhourEnd}:00`) : new Date())
+                      hourPickerMode === 'start'
+                        ? (taskhour ? new Date(startDate.toDateString() + ' ' + taskhour) : startDate)
+                        : (taskhourEnd ? new Date(endDate.toDateString() + ' ' + taskhourEnd) : endDate)
                     }
                     mode="time"
                     is24Hour={true}
                     display="default"
                     onChange={(event, selectedDate) => {
-                      setShowTimePicker(false);
+                      setShowHourPicker(false);
                       if (selectedDate) {
                         const hours = selectedDate.getHours().toString().padStart(2, '0');
                         const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-                        if (whichTime === 'start') {
+                        if (hourPickerMode === 'start') {
                           setTaskHour(`${hours}:${minutes}`);
                         } else {
                           setTaskHourEnd(`${hours}:${minutes}`);
+                          // Comprobar si la hora de fin es menor o igual que la de inicio
+                          if (taskhour) {
+                            const [h1, m1] = taskhour.split(':').map(Number);
+                            const [h2, m2] = [parseInt(hours), parseInt(minutes)];
+                            // Si la hora de fin es menor o igual que la de inicio, suma un día a endDate
+                            if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+                              const newEndDate = new Date(startDate);
+                              newEndDate.setDate(newEndDate.getDate() + 1);
+                              setEndDate(newEndDate);
+                            } else {
+                              // Si no, iguala endDate a startDate
+                              setEndDate(startDate);
+                            }
+                          }
                         }
                       }
                     }}
