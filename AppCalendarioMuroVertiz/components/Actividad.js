@@ -62,6 +62,12 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [isRange, setIsRange] = useState(false);
   const [taskhourEnd, setTaskHourEnd] = useState('');
   const [whichTime, setWhichTime] = useState('start');
+  const [startDate, setStartDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
+  const [endDate, setEndDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
+  const [showHourPicker, setShowHourPicker] = useState(false);
+  const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -397,80 +403,166 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
               style={styles.input}
             />
 
-            {/* Dentro del render del modal de edición/creación */}
             {tasktype === 'evento' && (
               <View style={{ marginBottom: 10 }}>
-                {/* Hora */}
-                <Text style={{ marginBottom: 6 }}>Hora</Text>
-
-                {/* Rango de hora y checkbox */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                  <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 4, marginLeft: 10 }}> Rango de horas </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (!isRange && taskhour) {
-                        // Suma 1 hora a la hora de inicio
-                        const [h, m] = taskhour.split(':').map(Number);
-                        const endHour = (h + 1) % 24;
-                        const endStr = `${endHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                        setTaskHourEnd(endStr);
-                      }
-                      setIsRange(!isRange);
-                    }}
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderWidth: 2,
-                      borderColor: '#cacbcc',
-                      borderRadius: 4,
-                      marginRight: 8,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#fff',
-                    }}
-                  >
-                    {isRange && (
-                      <View style={{
-                        width: 14,
-                        height: 14,
-                        backgroundColor: '#2196F3',
-                        borderRadius: 2,
-                      }} />
-                    )}
-                  </TouchableOpacity>
+                {/* Hora y Rango de horas */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between' }}>
+                  <Text>Hora</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 8 }}>Rango de horas</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (!isRange) {
+                          setEndDate(startDate);
+                          setTaskHourEnd(taskhour ? taskhour : '12:00');
+                        }
+                        setIsRange(!isRange);
+                      }}
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderWidth: 2,
+                        borderColor: '#2196F3',
+                        borderRadius: 4,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: isRange ? '#2196F3' : '#fff',
+                      }}
+                    >
+                      {isRange && (
+                        <View style={{
+                          width: 14,
+                          height: 14,
+                          backgroundColor: '#fff',
+                          borderRadius: 2,
+                        }} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
-                {/* Hora inicio */}
-                <Button
-                  title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
-                  onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
-                />
+                {/* Si NO es rango, solo muestra una fila con fecha y hora */}
+                {!isRange && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                      }}
+                      onPress={() => { setDatePickerMode('start'); setShowDatePicker(true); }}
+                    >
+                      <Text>
+                        {startDate
+                          ? (() => {
+                            const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                            const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                            return `${dias[startDate.getDay()]}, ${startDate.getDate()} ${meses[startDate.getMonth()]}`;
+                          })()
+                          : 'Fecha'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                      }}
+                      onPress={() => { setHourPickerMode('start'); setShowHourPicker(true); }}
+                    >
+                      <Text>{taskhour || 'Hora'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Si es rango, muestra Desde y Hasta */}
                 {isRange && (
-                  <Button
-                    title={taskhourEnd ? `Hora fin: ${taskhourEnd}` : "Seleccionar hora fin"}
-                    onPress={() => { setWhichTime('end'); setShowTimePicker(true); }}
+                  <>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5 }}>Desde</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                        }}
+                        onPress={() => { setDatePickerMode('start'); setShowDatePicker(true); }}
+                      >
+                        <Text>
+                          {startDate
+                            ? (() => {
+                              const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                              const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                              return `${dias[startDate.getDay()]}, ${startDate.getDate()} ${meses[startDate.getMonth()]}`;
+                            })()
+                            : 'Fecha'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                        }}
+                        onPress={() => { setHourPickerMode('start'); setShowHourPicker(true); }}
+                      >
+                        <Text>{taskhour || 'Hora'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5  }}>Hasta</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginRight: 10, minWidth: 110, alignItems: 'center'
+                        }}
+                        onPress={() => { setDatePickerMode('end'); setShowDatePicker(true); }}
+                      >
+                        <Text>
+                          {endDate
+                            ? (() => {
+                              const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                              const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                              return `${dias[endDate.getDay()]}, ${endDate.getDate()} ${meses[endDate.getMonth()]}`;
+                            })()
+                            : 'Fecha'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, minWidth: 70, alignItems: 'center'
+                        }}
+                        onPress={() => { setHourPickerMode('end'); setShowHourPicker(true); }}
+                      >
+                        <Text>{taskhourEnd || 'Hora'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+
+                {/* DateTimePickers */}
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={datePickerMode === 'start' ? startDate : endDate}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        if (datePickerMode === 'start') setStartDate(selectedDate);
+                        else setEndDate(selectedDate);
+                      }
+                    }}
                   />
                 )}
-                {showTimePicker && (
+                {showHourPicker && (
                   <DateTimePicker
                     value={
-                      whichTime === 'start'
-                        ? (taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date())
-                        : (taskhourEnd ? new Date(`1970-01-01T${taskhourEnd}:00`) : new Date())
+                      hourPickerMode === 'start'
+                        ? (taskhour ? new Date(startDate.toDateString() + ' ' + taskhour) : startDate)
+                        : (taskhourEnd ? new Date(endDate.toDateString() + ' ' + taskhourEnd) : endDate)
                     }
                     mode="time"
                     is24Hour={true}
                     display="default"
                     onChange={(event, selectedDate) => {
-                      setShowTimePicker(false);
+                      setShowHourPicker(false);
                       if (selectedDate) {
                         const hours = selectedDate.getHours().toString().padStart(2, '0');
                         const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-                        if (whichTime === 'start') {
-                          setTaskHour(`${hours}:${minutes}`);
-                        } else {
-                          setTaskHourEnd(`${hours}:${minutes}`);
-                        }
+                        if (hourPickerMode === 'start') setTaskHour(`${hours}:${minutes}`);
+                        else setTaskHourEnd(`${hours}:${minutes}`);
                       }
                     }}
                   />
