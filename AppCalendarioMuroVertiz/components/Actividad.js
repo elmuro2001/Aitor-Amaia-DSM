@@ -402,7 +402,16 @@ const GestorActividades = ({ selectedDate }) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <Text>¿Rango?</Text>
                   <TouchableOpacity
-                    onPress={() => setIsRange(!isRange)}
+                    onPress={() => {
+                      if (!isRange && taskhour) {
+                        // Suma 1 hora a la hora de inicio
+                        const [h, m] = taskhour.split(':').map(Number);
+                        const endHour = (h + 1) % 24;
+                        const endStr = `${endHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                        setTaskHourEnd(endStr);
+                      }
+                      setIsRange(!isRange);
+                    }}
                     style={{
                       marginLeft: 10,
                       backgroundColor: isRange ? '#2196F3' : '#ccc',
