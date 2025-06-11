@@ -119,12 +119,16 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     const dateTasks = tasks[selectedDate] || [];
     const newTask = {
       name: taskName,
-      hour: isRange && taskhourEnd ? `${taskhour} - ${taskhourEnd}` : taskhour,
       type: tasktype,
       description: taskdescription,
       color: taskcolor || 'negro',
       location: tasklocation,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: isRange ? (endDate ? endDate.toISOString() : null) : null,
+      startHour: taskhour,
+      endHour: isRange ? taskhourEnd : null,
     };
+
     let newDateTasks;
     if (editIndex !== null) {
       newDateTasks = [...dateTasks];
@@ -173,6 +177,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskLocation(task.location);
     setEditIndex(index);
     setModalVisible(true);
+    setStartDate(task.startDate ? new Date(task.startDate) : new Date());
+    setEndDate(task.endDate ? new Date(task.endDate) : new Date());
+    setTaskHour(task.startHour || '');
+    setTaskHourEnd(task.endHour || '');
+    setIsRange(!!task.endHour);
   };
 
   // Mostrar modal de solo vista
@@ -227,18 +236,28 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                   <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
                     {item.name}
                   </Text>
-                  {item.type === 'evento' && item.hour ? (
+                  {item.type === 'evento' && item.startDate && item.startHour && (
                     <Text style={{ color: '#666', fontSize: 14 }}>
-                      {item.hour}
+                      {(() => {
+                        const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                        const startD = new Date(item.startDate);
+                        const endD = item.endDate ? new Date(item.endDate) : null;
+                        const sameDay = endD && startD.toDateString() === endD.toDateString();
+
+                        if (item.endHour && endD) {
+                          if (sameDay) {
+                            return `${item.startHour} - ${item.endHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                          } else {
+                            return `${item.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]} - ${item.endHour} ${dias[endD.getDay()]}, ${endD.getDate()} ${meses[endD.getMonth()]}`;
+                          }
+                        } else {
+                          return `${item.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                        }
+                      })()}
                     </Text>
-                  ) : null}
+                  )}
                 </View>
-                <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
-                  <Ionicons name="pencil" size={22} color="#2196F3" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteTask(index)}>
-                  <Ionicons name="trash" size={22} color="red" />
-                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           )}
@@ -335,19 +354,30 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                   {viewTask.name ? (
                     <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
                   ) : null}
-                  {viewTask.type === 'evento' && viewTask.hour ? (
+                  {viewTask.type === 'evento' && viewTask.startDate && viewTask.startHour && (
                     <Text style={{ marginBottom: 10 }}>
-                      {viewTask.hour}
-                      {selectedDate
-                        ? (() => {
-                          const dateObj = new Date(selectedDate);
-                          const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-                          const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-                          return ` ${dias[dateObj.getDay()]}, ${dateObj.getDate()} ${meses[dateObj.getMonth()]}`;
-                        })()
-                        : ''}
+                      {(() => {
+                        const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                        const startD = new Date(viewTask.startDate);
+                        const endD = viewTask.endDate ? new Date(viewTask.endDate) : null;
+                        const sameDay = endD && startD.toDateString() === endD.toDateString();
+
+                        if (viewTask.endHour && endD) {
+                          if (sameDay) {
+                            // Mismo día: 12:00 - 13:00 mié, 11 jun
+                            return `${viewTask.startHour} - ${viewTask.endHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                          } else {
+                            // Distinto día: 12:00 mié, 11 jun - 13:00 jue, 12 jun
+                            return `${viewTask.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]} - ${viewTask.endHour} ${dias[endD.getDay()]}, ${endD.getDate()} ${meses[endD.getMonth()]}`;
+                          }
+                        } else {
+                          // Solo una hora: 12:00 mié, 11 jun
+                          return `${viewTask.startHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
+                        }
+                      })()}
                     </Text>
-                  ) : null}
+                  )}
                   {viewTask.description ? (
                     <View
                       style={{
@@ -501,7 +531,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                         <Text>{taskhour || 'Hora'}</Text>
                       </TouchableOpacity>
                     </View>
-                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5  }}>Hasta</Text>
+                    <Text style={{ fontStyle: 'italic', color: '#888', marginLeft: 5 }}>Hasta</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                       <TouchableOpacity
                         style={{
