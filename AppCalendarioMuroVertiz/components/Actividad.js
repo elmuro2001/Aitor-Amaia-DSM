@@ -153,7 +153,7 @@ const GestorActividades = ({ selectedDate }) => {
     setModalVisible(true);
   };
 
-    // Mostrar modal de solo vista
+  // Mostrar modal de solo vista
   const openViewModal = (task, index) => {
     setViewTask(task);
     setViewTaskIndex(index);
@@ -272,38 +272,91 @@ const GestorActividades = ({ selectedDate }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            {/* Botones editar y borrar arriba a la derecha */}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setViewModalVisible(false);
-                  startEditTask(viewTaskIndex);
+            {/* Franja de color debajo del tipo */}
+            {(viewTask.type && viewTask.color) ? (
+              <View
+                style={{
+                  width: '100%',
+                  height: 24,
+                  backgroundColor: viewTask.color || '#333',
+                  borderRadius: 8,
+                  marginBottom: 10,
+                  marginTop: 4,
                 }}
-                style={{ marginHorizontal: 8 }}
-              >
-                <Ionicons name="pencil" size={24} color="#2196F3" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setViewModalVisible(false);
-                  deleteTask(viewTaskIndex);
-                }}
-              >
-                <Ionicons name="trash" size={24} color="red" />
-              </TouchableOpacity>
+              />
+            ) : null}
+            {/* El resto del contenido del modal */}
+            <View style={{ marginTop: 10, zIndex: 2 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setViewModalVisible(false);
+                    startEditTask(viewTaskIndex);
+                  }}
+                  style={{ marginHorizontal: 8 }}
+                >
+                  <Ionicons name="pencil" size={24} color="#2196F3" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setViewModalVisible(false);
+                    deleteTask(viewTaskIndex);
+                  }}
+                >
+                  <Ionicons name="trash" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+              {viewTask && (
+                <>
+                  {viewTask.name ? (
+                    <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
+                  ) : null}
+                  {viewTask.hour ? (
+                    <Text style={{ marginBottom: 10 }}>
+                      {viewTask.hour}
+                      {selectedDate
+                        ? (() => {
+                          const dateObj = new Date(selectedDate);
+                          const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                          const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                          return ` ${dias[dateObj.getDay()]}, ${dateObj.getDate()} ${meses[dateObj.getMonth()]}`;
+                        })()
+                        : ''}
+                    </Text>
+                  ) : null}
+                  {viewTask.description ? (
+                    <View
+                      style={{
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 8,
+                        padding: 10,
+                        marginBottom: 10,
+                        marginTop: 4,
+                      }}
+                    >
+                      <Text style={{ color: '#333' }}>{viewTask.description}</Text>
+                    </View>
+                  ) : null}
+                  {viewTask.location ? (
+                    <View
+                      style={{
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 8,
+                        padding: 10,
+                        marginBottom: 10,
+                        marginTop: 0,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Ionicons name="location-sharp" size={18} color="#6e6d6d" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#333' }}>{viewTask.location}</Text>
+                    </View>
+                  ) : null}
+                </>
+              )}
+              <Button title="Cerrar" onPress={() => setViewModalVisible(false)} />
             </View>
-            {/* Detalles de la tarea/evento */}
-            {viewTask && (
-              <>
-                <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
-                <Text style={{ marginBottom: 5 }}>Hora: {viewTask.hour}</Text>
-                <Text style={{ marginBottom: 5 }}>Tipo: {viewTask.type}</Text>
-                <Text style={{ marginBottom: 5 }}>Descripción: {viewTask.description}</Text>
-                <Text style={{ marginBottom: 5 }}>Color: <Text style={{ color: viewTask.color }}>{viewTask.color}</Text></Text>
-                <Text style={{ marginBottom: 5 }}>Ubicación: {viewTask.location}</Text>
-              </>
-            )}
-            <Button title="Cerrar" onPress={() => setViewModalVisible(false)} />
           </View>
         </View>
       </Modal>
