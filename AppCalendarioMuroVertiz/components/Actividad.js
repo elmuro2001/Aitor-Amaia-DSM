@@ -400,8 +400,12 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
             {/* Dentro del render del modal de edición/creación */}
             {tasktype === 'evento' && (
               <View style={{ marginBottom: 10 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                  <Text>¿Rango?</Text>
+                {/* Hora */}
+                <Text style={{ marginBottom: 6 }}>Hora</Text>
+
+                {/* Rango de hora y checkbox */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 5, marginLeft:10 }}>Rango de horas</Text>
                   <TouchableOpacity
                     onPress={() => {
                       if (!isRange && taskhour) {
@@ -414,16 +418,29 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                       setIsRange(!isRange);
                     }}
                     style={{
-                      marginLeft: 10,
-                      backgroundColor: isRange ? '#2196F3' : '#ccc',
-                      borderRadius: 12,
-                      paddingHorizontal: 12,
-                      paddingVertical: 4,
+                      width: 22,
+                      height: 22,
+                      borderWidth: 2,
+                      borderColor: '#2196F3',
+                      borderRadius: 4,
+                      marginRight: 8,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: isRange ? '#2196F3' : '#fff',
                     }}
                   >
-                    <Text style={{ color: '#fff' }}>{isRange ? 'Sí' : 'No'}</Text>
+                    {isRange && (
+                      <View style={{
+                        width: 12,
+                        height: 12,
+                        backgroundColor: '#fff',
+                        borderRadius: 2,
+                      }} />
+                    )}
                   </TouchableOpacity>
                 </View>
+
+                {/* Hora inicio */}
                 <Button
                   title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
                   onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
