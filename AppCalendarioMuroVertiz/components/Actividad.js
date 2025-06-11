@@ -272,7 +272,7 @@ const deleteTask = async (index) => {
                 <Picker.Item label="Evento" value="evento" />
                 <Picker.Item label="Tarea" value="tarea" />
               </Picker>
-            </View>
+            </View> 
             {/* Mostrar el check solo si es tarea */}
             {tasktype === 'tarea' && editIndex !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
