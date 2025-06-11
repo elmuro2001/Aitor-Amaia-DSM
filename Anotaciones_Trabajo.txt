@@ -78,6 +78,13 @@ https://medium.com/@wvdelden99/how-to-style-your-calendar-in-react-native-215019
     Al hacer click al botón '+' Nos da la opción de 'Evento' o 'Tarea'. En el modal se seleccionará por defecto el elegido por el usuario.
     
     He pasado el theme del calendario a un js en styles para un manejo más sencillo de estilos.
-    
 
+    He hecho que las tareas/eventos del día seleccionado se representen en la pantalla, siendo estos scrolleables. 
+    He añadido unos iconos para editar y borrar (funcionalidades programadas con antelación) y he hecho que en primera instancia muestre el nombre de la tarea/evento y la hora.
+    Cuando lo he puesto he visto que estos botones de crear tarea/evento se muestran por debajo del contenedor del listado de tareas/eventos. Hay que arregalarlo.
+    
+11/06/2025:
+  Amaia: 
+    Después de 3h con esto he conseguido que el "desplegable" que aparece al hacer click al botón + no se quede por debajo del contenedor de
+    la lista de tareas/eventos del día.
     

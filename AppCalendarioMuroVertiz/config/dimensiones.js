@@ -14,7 +14,7 @@ const monthHeaderHeight = 50;
 const daySize = ((screenWidth - 32 - 6 * 4) / 7) - 2;
 
 // Espacio para el calendario y margen inferior
-const availableHeightInitial = screenHeight - headerHeight - footerHeight - monthHeaderHeight;
+const availableHeightInitial = screenHeight - headerHeight - footerHeight - monthHeaderHeight - 10;
 
 // Calculamos el margen inferior del calendario
 const marginBottomFactor = 0.7;
@@ -38,4 +38,5 @@ export default {
   daySize,
   dayHeight,
   headerText,
+  calendarMarginBottom,
 };
