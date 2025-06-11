@@ -51,6 +51,9 @@ const GestorActividades = ({ selectedDate }) => {
   const [taskcolor, setTaskColor] = useState('');
   const [tasklocation, setTaskLocation] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [viewTask, setViewTask] = useState(null);
+  const [viewTaskIndex, setViewTaskIndex] = useState(null);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
@@ -81,7 +84,6 @@ const GestorActividades = ({ selectedDate }) => {
     setModalVisible(true);
     toggleOptions(); // ocultar opciones otra vez
   };
-
 
   // Mostrar el selector de hora
   const onChangeTime = (event, selectedDate) => {
@@ -151,6 +153,14 @@ const GestorActividades = ({ selectedDate }) => {
     setModalVisible(true);
   };
 
+    // Mostrar modal de solo vista
+  const openViewModal = (task, index) => {
+    setViewTask(task);
+    setViewTaskIndex(index);
+    setViewModalVisible(true);
+  };
+
+
   return (
     <View style={{ flex: 1, position: 'relative' }}>
       {/* Lista de eventos */}
@@ -174,37 +184,39 @@ const GestorActividades = ({ selectedDate }) => {
           data={tasks[selectedDate] || []}
           keyExtractor={(_, idx) => idx.toString()}
           renderItem={({ item, index }) => (
-            <View
-              style={{
-                backgroundColor: '#f5f5f5',
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: '#d1d1d1',
-                padding: 10,
-                marginBottom: 8,
-                flexDirection: 'row',
-                alignItems: 'center',
-                shadowColor: '#000',
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 1,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
-                  {item.name}
-                </Text>
-                <Text style={{ color: '#666', fontSize: 14 }}>
-                  {item.hour}
-                </Text>
+            <TouchableOpacity onPress={() => openViewModal(item, index)}>
+              <View
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: '#d1d1d1',
+                  padding: 10,
+                  marginBottom: 8,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOpacity: 0.05,
+                  shadowRadius: 2,
+                  elevation: 1,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
+                    {item.name}
+                  </Text>
+                  <Text style={{ color: '#666', fontSize: 14 }}>
+                    {item.hour}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
+                  <Ionicons name="pencil" size={22} color="#2196F3" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteTask(index)}>
+                  <Ionicons name="trash" size={22} color="red" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
-                <Ionicons name="pencil" size={22} color="#2196F3" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => deleteTask(index)}>
-                <Ionicons name="trash" size={22} color="red" />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </View>
@@ -251,8 +263,52 @@ const GestorActividades = ({ selectedDate }) => {
         )}
       </View>
 
-      
-      {/* Modal */}
+      {/* Modal de solo vista */}
+      <Modal
+        visible={viewModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setViewModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {/* Botones editar y borrar arriba a la derecha */}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setViewModalVisible(false);
+                  startEditTask(viewTaskIndex);
+                }}
+                style={{ marginHorizontal: 8 }}
+              >
+                <Ionicons name="pencil" size={24} color="#2196F3" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setViewModalVisible(false);
+                  deleteTask(viewTaskIndex);
+                }}
+              >
+                <Ionicons name="trash" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+            {/* Detalles de la tarea/evento */}
+            {viewTask && (
+              <>
+                <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
+                <Text style={{ marginBottom: 5 }}>Hora: {viewTask.hour}</Text>
+                <Text style={{ marginBottom: 5 }}>Tipo: {viewTask.type}</Text>
+                <Text style={{ marginBottom: 5 }}>Descripción: {viewTask.description}</Text>
+                <Text style={{ marginBottom: 5 }}>Color: <Text style={{ color: viewTask.color }}>{viewTask.color}</Text></Text>
+                <Text style={{ marginBottom: 5 }}>Ubicación: {viewTask.location}</Text>
+              </>
+            )}
+            <Button title="Cerrar" onPress={() => setViewModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de edición/creación */}
       <Modal
         visible={modalVisible}
         animationType="slide"
