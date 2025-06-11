@@ -103,7 +103,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Crear o editar tarea con todas las propiedades
-  const saveTask = () => {
+  const saveTask = async () => {
     if (!selectedDate) {
       setError('Selecciona una fecha antes de guardar la tarea.');
       return;
