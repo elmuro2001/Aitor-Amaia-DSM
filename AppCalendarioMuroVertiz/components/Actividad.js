@@ -405,7 +405,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
 
                 {/* Rango de hora y checkbox */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                  <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 5, marginLeft:10 }}>Rango de horas</Text>
+                  <Text style={{ fontStyle: 'italic', color: '#888', marginRight: 4, marginLeft: 10 }}> Rango de horas </Text>
                   <TouchableOpacity
                     onPress={() => {
                       if (!isRange && taskhour) {
@@ -421,19 +421,19 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                       width: 22,
                       height: 22,
                       borderWidth: 2,
-                      borderColor: '#2196F3',
+                      borderColor: '#cacbcc',
                       borderRadius: 4,
                       marginRight: 8,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: isRange ? '#2196F3' : '#fff',
+                      backgroundColor: '#fff',
                     }}
                   >
                     {isRange && (
                       <View style={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: '#fff',
+                        width: 14,
+                        height: 14,
+                        backgroundColor: '#2196F3',
                         borderRadius: 2,
                       }} />
                     )}
