@@ -132,7 +132,7 @@ const CalendarComponent = () => {
           />
         </View>
 
-        {/* GESTOR RE ACTIVIDADES */}
+        {/* GESTOR DE ACTIVIDADES */}
         <View>
           <GestorActividades
             selectedDate={selectedDate}
