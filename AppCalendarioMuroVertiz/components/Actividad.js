@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert, Animated, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert, Animated, Switch, Easing } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from '../styles/CalendarioStyle';
+
 
 // Paleta de colores
 const COLORS = [
@@ -42,12 +44,15 @@ const ColorPicker = ({ selectedColor, onSelect }) => (
 
 //Componenete
 const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
+
+  // Estados para las propiedades
   const [taskName, setTaskName] = useState('');
   const [taskhour, setTaskHour] = useState('');
   const [tasktype, setTaskType] = useState('evento'); // Por defecto "evento"
   const [taskdescription, setTaskDescription] = useState('');
-  const [taskcolor, setTaskColor] = useState('');
+  const [taskcolor, setTaskColor] = useState('#000000');
   const [tasklocation, setTaskLocation] = useState('');
+  const [taskDone, setTaskDone] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -73,8 +78,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskHour('12:00');
     setTaskType(type);
     setTaskDescription('');
-    setTaskColor('');
+    setTaskColor('#000000');
     setTaskLocation('');
+    setTaskDone(false);
     setEditIndex(null);
     setModalVisible(true);
     toggleOptions(); // ocultar opciones otra vez
@@ -92,49 +98,59 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Crear o editar tarea con todas las propiedades
-  const saveTask = () => {
-    if (!selectedDate) {
-      setError('Selecciona una fecha antes de guardar la tarea.');
-      return;
-    }
-    if (!taskName.trim()) {
-      setError('El nombre de la tarea es obligatorio.');
-      return;
-    }
-    setError('');
-    const dateTasks = tasks[selectedDate] || [];
-    const newTask = {
-      name: taskName,
-      hour: taskhour,
-      type: tasktype,
-      description: taskdescription,
-      color: taskcolor || 'negro',
-      location: tasklocation,
-    };
-    let newDateTasks;
-    if (editIndex !== null) {
-      newDateTasks = [...dateTasks];
-      newDateTasks[editIndex] = newTask;
-    } else {
-      newDateTasks = [...dateTasks, newTask];
-    }
-    setTasks({ ...tasks, [selectedDate]: newDateTasks });
-    setTaskName('');
-    setTaskHour('');
-    setTaskType('evento');
-    setTaskDescription('');
-    setTaskColor('');
-    setTaskLocation('');
-    setModalVisible(false);
-    setEditIndex(null);
+  const saveTask = async () => {
+  if (!selectedDate) {
+    setError('Selecciona una fecha antes de guardar la tarea.');
+    return;
+  }
+  if (!taskName.trim()) {
+    setError('El nombre de la tarea es obligatorio.');
+    return;
+  }
+  setError('');
+  const dateTasks = tasks[selectedDate] || [];
+  const newTask = {
+    name: taskName,
+    hour: taskhour,
+    type: tasktype,
+    description: taskdescription,
+    color: taskcolor || 'Negro',
+    location: tasklocation,
+    ...(tasktype === 'tarea' ? { done: taskDone } : {}),
   };
+  let newDateTasks;
+  if (editIndex !== null) {
+    newDateTasks = [...dateTasks];
+    newDateTasks[editIndex] = newTask;
+  } else {
+    newDateTasks = [...dateTasks, newTask];
+  }
+  const newTasks = { ...tasks, [selectedDate]: newDateTasks };
+  setTasks(newTasks);
+
+  //guardar
+  await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
+
+  //reset al cerrar el modal tras guardar
+  setTaskName('');
+  setTaskHour('');
+  setTaskType('evento');
+  setTaskDescription('');
+  setTaskColor('');
+  setTaskLocation('');
+  setTaskDone(false);
+  setModalVisible(false);
+  setEditIndex(null);
+};
 
   // Borrar tarea
-  const deleteTask = (index) => {
-    const dateTasks = tasks[selectedDate] || [];
-    const newDateTasks = dateTasks.filter((_, i) => i !== index);
-    setTasks({ ...tasks, [selectedDate]: newDateTasks });
-  };
+const deleteTask = async (index) => {
+  const dateTasks = tasks[selectedDate] || [];
+  const newDateTasks = dateTasks.filter((_, i) => i !== index);
+  const newTasks = { ...tasks, [selectedDate]: newDateTasks };
+  setTasks(newTasks);
+  await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks)); // <-- GUARDA EN ASYNCSTORAGE
+};
 
   // Editar tarea
   const startEditTask = (index) => {
@@ -145,6 +161,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskDescription(task.description);
     setTaskColor(task.color);
     setTaskLocation(task.location);
+    setTaskDone(task.done || false);
     setEditIndex(index);
     setModalVisible(true);
   };
@@ -256,6 +273,13 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                 <Picker.Item label="Tarea" value="tarea" />
               </Picker>
             </View>
+            {/* Mostrar el check solo si es tarea */}
+            {tasktype === 'tarea' && editIndex !== null && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                <Text>Hecha: </Text>
+                <Switch value={taskDone} onValueChange={setTaskDone} />
+              </View>
+            )}
             <TextInput
               placeholder="Descripción"
               value={taskdescription}
