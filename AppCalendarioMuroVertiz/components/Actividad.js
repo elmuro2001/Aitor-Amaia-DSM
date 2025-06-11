@@ -78,13 +78,15 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const handleCreate = (type) => {
     setTaskName('');
     setTaskHour('12:00');
+    setTaskHourEnd('');
+    setIsRange(false);
     setTaskType(type);
     setTaskDescription('');
     setTaskColor('');
     setTaskLocation('');
     setEditIndex(null);
     setModalVisible(true);
-    toggleOptions(); // ocultar opciones otra vez
+    toggleOptions();
   };
 
   // Mostrar el selector de hora
