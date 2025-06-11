@@ -152,73 +152,21 @@ const GestorActividades = ({ selectedDate }) => {
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.fab} onPress={toggleOptions}>
-        <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.fab} onPress={toggleOptions}>
-        <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
-      </TouchableOpacity>
-
-      <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
-        {/* Botón para crear tarea */}
-        {showOptions && (
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  translateY: animation.interpolate({
-                    inputRange: [0, 15], outputRange: [0, -130],
-                  }),
-                },
-              ],
-              opacity: animation,
-              marginBottom: 0,
-            }}
-          >
-            <TouchableOpacity
-              style={[styles.fabOption, { backgroundColor: '#4CAF50' }]}
-              onPress={() => handleCreate('tarea')}
-            >
-              <MaterialIcons name="assignment" size={20} color="#fff" />
-              <Text style={{ color: '#fff', marginLeft: 5 }}>Tarea</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* Botón para crear evento */}
-        {showOptions && (
-          <Animated.View
-            style={{
-              transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, -100] }) }],
-              opacity: animation,
-              marginBottom: 10,
-            }}
-          >
-            <TouchableOpacity
-              style={[styles.fabOption, { backgroundColor: '#2196F3' }]}
-              onPress={() => handleCreate('evento')}
-            >
-              <MaterialIcons name="event" size={20} color="#fff" />
-              <Text style={{ color: '#fff', marginLeft: 5 }}>Evento</Text>
-            </TouchableOpacity>
-          </Animated.View> 
-        )}
-      </View>
-
+    <View style={{ flex: 1, position: 'relative' }}>
+      {/* Lista de eventos */}
       <View
         style={{
-          height: ((dimensiones.dayHeight + 4) * 2), // 4 es la distancia entre los bloques de una semana y otra
-          marginRight: 80,
+          height: ((dimensiones.dayHeight + 4) * 2),
+          width: dimensiones.screenWidth - 120,
+          marginRight: 10,
           marginLeft: 10,
-          marginTop: 10,
-          marginBottom: 2,
+          marginTop: -((dimensiones.dayHeight + 4) * 2),
+          marginBottom: 0,
           backgroundColor: '#fff',
           borderRadius: 12,
           padding: 8,
           overflow: 'hidden',
-          elevation: 10,
+          elevation: 0,
         }}
       >
         <FlatList
@@ -261,6 +209,50 @@ const GestorActividades = ({ selectedDate }) => {
         />
       </View>
 
+      {/* Botón principal y botones flotantes */}
+      <TouchableOpacity style={styles.fab} onPress={toggleOptions}>
+        <Ionicons name={showOptions ? 'close' : 'add'} size={30} color="#fff" />
+      </TouchableOpacity>
+
+      <View style={{ position: 'absolute', bottom: 20, right: 20 }}>
+        {showOptions && (
+          <>
+            <Animated.View
+              style={{
+                transform: [{ translateY: animation.interpolate({ inputRange: [0, 15], outputRange: [0, -130] }) }],
+                opacity: animation,
+                marginBottom: 0,
+              }}
+            >
+              <TouchableOpacity
+                style={[styles.fabOption, { backgroundColor: '#4CAF50' }]}
+                onPress={() => handleCreate('tarea')}
+              >
+                <MaterialIcons name="assignment" size={20} color="#fff" />
+                <Text style={{ color: '#fff', marginLeft: 5 }}>Tarea</Text>
+              </TouchableOpacity>
+            </Animated.View>
+            <Animated.View
+              style={{
+                transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, -100] }) }],
+                opacity: animation,
+                marginBottom: 10,
+              }}
+            >
+              <TouchableOpacity
+                style={[styles.fabOption, { backgroundColor: '#2196F3' }]}
+                onPress={() => handleCreate('evento')}
+              >
+                <MaterialIcons name="event" size={20} color="#fff" />
+                <Text style={{ color: '#fff', marginLeft: 5 }}>Evento</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </>
+        )}
+      </View>
+
+      
+      {/* Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
