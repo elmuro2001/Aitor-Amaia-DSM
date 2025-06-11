@@ -1,6 +1,6 @@
 // Importaciones necesarias
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image, } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -46,24 +46,21 @@ const CalendarComponent = () => {
   };
 
   // Construir markedDates con dots de colores
-  const markedDates = {};
-  Object.entries(tasks).forEach(([date, actividades]) => {
-    if (actividades.length > 0) {
-      markedDates[date] = {
-        marked: true,
-        dots: actividades.map(act => ({
-          key: act.name,
-          color: act.color || '#000',
-        })),
-        // Resaltar el seleccionado:
-        ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
-      };
-    }
-  });
-  // Si no hay dots para el día seleccionado, márcalo igualmente
-  if (selectedDate && !markedDates[selectedDate]) {
-    markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
+const markedDates = {};
+Object.entries(tasks).forEach(([date, actividades]) => {
+  if (actividades.length > 0) {
+    markedDates[date] = {
+      dots: actividades.map((act, idx) => ({
+        key: act.name + idx,
+        color: act.color || '#000',
+      })),
+      ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
+    };
   }
+});
+if (selectedDate && !markedDates[selectedDate]) {
+  markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
+}
 
   return (
     <SafeAreaView style={styles.container}>
