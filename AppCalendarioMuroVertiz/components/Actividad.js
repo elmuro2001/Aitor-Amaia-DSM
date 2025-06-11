@@ -220,9 +220,11 @@ const GestorActividades = ({ selectedDate }) => {
                   <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
                     {item.name}
                   </Text>
-                  <Text style={{ color: '#666', fontSize: 14 }}>
-                    {item.hour}
-                  </Text>
+                  {item.type === 'evento' && item.hour ? (
+                    <Text style={{ color: '#666', fontSize: 14 }}>
+                      {item.hour}
+                    </Text>
+                  ) : null}
                 </View>
                 <TouchableOpacity onPress={() => startEditTask(index)} style={{ marginHorizontal: 8 }}>
                   <Ionicons name="pencil" size={22} color="#2196F3" />
@@ -326,7 +328,7 @@ const GestorActividades = ({ selectedDate }) => {
                   {viewTask.name ? (
                     <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>{viewTask.name}</Text>
                   ) : null}
-                  {viewTask.hour ? (
+                  {viewTask.type === 'evento' && viewTask.hour ? (
                     <Text style={{ marginBottom: 10 }}>
                       {viewTask.hour}
                       {selectedDate
@@ -393,57 +395,61 @@ const GestorActividades = ({ selectedDate }) => {
               onChangeText={setTaskName}
               style={styles.input}
             />
-            <View style={{ marginBottom: 10 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                <Text>¿Rango?</Text>
-                <TouchableOpacity
-                  onPress={() => setIsRange(!isRange)}
-                  style={{
-                    marginLeft: 10,
-                    backgroundColor: isRange ? '#2196F3' : '#ccc',
-                    borderRadius: 12,
-                    paddingHorizontal: 12,
-                    paddingVertical: 4,
-                  }}
-                >
-                  <Text style={{ color: '#fff' }}>{isRange ? 'Sí' : 'No'}</Text>
-                </TouchableOpacity>
-              </View>
-              <Button
-                title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
-                onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
-              />
-              {isRange && (
+
+            {/* Dentro del render del modal de edición/creación */}
+            {tasktype === 'evento' && (
+              <View style={{ marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Text>¿Rango?</Text>
+                  <TouchableOpacity
+                    onPress={() => setIsRange(!isRange)}
+                    style={{
+                      marginLeft: 10,
+                      backgroundColor: isRange ? '#2196F3' : '#ccc',
+                      borderRadius: 12,
+                      paddingHorizontal: 12,
+                      paddingVertical: 4,
+                    }}
+                  >
+                    <Text style={{ color: '#fff' }}>{isRange ? 'Sí' : 'No'}</Text>
+                  </TouchableOpacity>
+                </View>
                 <Button
-                  title={taskhourEnd ? `Hora fin: ${taskhourEnd}` : "Seleccionar hora fin"}
-                  onPress={() => { setWhichTime('end'); setShowTimePicker(true); }}
+                  title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
+                  onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
                 />
-              )}
-              {showTimePicker && (
-                <DateTimePicker
-                  value={
-                    whichTime === 'start'
-                      ? (taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date())
-                      : (taskhourEnd ? new Date(`1970-01-01T${taskhourEnd}:00`) : new Date())
-                  }
-                  mode="time"
-                  is24Hour={true}
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    setShowTimePicker(false);
-                    if (selectedDate) {
-                      const hours = selectedDate.getHours().toString().padStart(2, '0');
-                      const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-                      if (whichTime === 'start') {
-                        setTaskHour(`${hours}:${minutes}`);
-                      } else {
-                        setTaskHourEnd(`${hours}:${minutes}`);
-                      }
+                {isRange && (
+                  <Button
+                    title={taskhourEnd ? `Hora fin: ${taskhourEnd}` : "Seleccionar hora fin"}
+                    onPress={() => { setWhichTime('end'); setShowTimePicker(true); }}
+                  />
+                )}
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={
+                      whichTime === 'start'
+                        ? (taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date())
+                        : (taskhourEnd ? new Date(`1970-01-01T${taskhourEnd}:00`) : new Date())
                     }
-                  }}
-                />
-              )}
-            </View>
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowTimePicker(false);
+                      if (selectedDate) {
+                        const hours = selectedDate.getHours().toString().padStart(2, '0');
+                        const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
+                        if (whichTime === 'start') {
+                          setTaskHour(`${hours}:${minutes}`);
+                        } else {
+                          setTaskHourEnd(`${hours}:${minutes}`);
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </View>
+            )}
 
             {/* Selector de tipo */}
             <View style={{ marginVertical: 10 }}>
