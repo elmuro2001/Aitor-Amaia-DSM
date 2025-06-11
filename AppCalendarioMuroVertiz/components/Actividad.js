@@ -60,6 +60,9 @@ const GestorActividades = ({ selectedDate }) => {
   const [error, setError] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [animation] = useState(new Animated.Value(0));
+  const [isRange, setIsRange] = useState(false);
+  const [taskhourEnd, setTaskHourEnd] = useState('');
+  const [whichTime, setWhichTime] = useState('start');
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -109,7 +112,7 @@ const GestorActividades = ({ selectedDate }) => {
     const dateTasks = tasks[selectedDate] || [];
     const newTask = {
       name: taskName,
-      hour: taskhour,
+      hour: isRange && taskhourEnd ? `${taskhour} - ${taskhourEnd}` : taskhour,
       type: tasktype,
       description: taskdescription,
       color: taskcolor || 'negro',
@@ -144,7 +147,19 @@ const GestorActividades = ({ selectedDate }) => {
   const startEditTask = (index) => {
     const task = tasks[selectedDate][index];
     setTaskName(task.name);
-    setTaskHour(task.hour);
+
+    // Si es un rango, separar hora inicio y fin
+    if (task.hour && task.hour.includes('-')) {
+      const [start, end] = task.hour.split('-').map(s => s.trim());
+      setTaskHour(start);
+      setTaskHourEnd(end);
+      setIsRange(true);
+    } else {
+      setTaskHour(task.hour || '');
+      setTaskHourEnd('');
+      setIsRange(false);
+    }
+
     setTaskType(task.type || 'evento');
     setTaskDescription(task.description);
     setTaskColor(task.color);
@@ -273,7 +288,7 @@ const GestorActividades = ({ selectedDate }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {/* Franja de color debajo del tipo */}
-            {(viewTask.type && viewTask.color) ? (
+            {viewTask && viewTask.type && viewTask.color ? (
               <View
                 style={{
                   width: '100%',
@@ -378,19 +393,58 @@ const GestorActividades = ({ selectedDate }) => {
               onChangeText={setTaskName}
               style={styles.input}
             />
-            <View>
-              <Text>Hora</Text>
-              <Button title={taskhour ? `Hora: ${taskhour}` : "Seleccionar hora"} onPress={() => setShowTimePicker(true)} />
+            <View style={{ marginBottom: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <Text>¿Rango?</Text>
+                <TouchableOpacity
+                  onPress={() => setIsRange(!isRange)}
+                  style={{
+                    marginLeft: 10,
+                    backgroundColor: isRange ? '#2196F3' : '#ccc',
+                    borderRadius: 12,
+                    paddingHorizontal: 12,
+                    paddingVertical: 4,
+                  }}
+                >
+                  <Text style={{ color: '#fff' }}>{isRange ? 'Sí' : 'No'}</Text>
+                </TouchableOpacity>
+              </View>
+              <Button
+                title={taskhour ? `Hora inicio: ${taskhour}` : "Seleccionar hora inicio"}
+                onPress={() => { setWhichTime('start'); setShowTimePicker(true); }}
+              />
+              {isRange && (
+                <Button
+                  title={taskhourEnd ? `Hora fin: ${taskhourEnd}` : "Seleccionar hora fin"}
+                  onPress={() => { setWhichTime('end'); setShowTimePicker(true); }}
+                />
+              )}
               {showTimePicker && (
                 <DateTimePicker
-                  value={taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date()}
+                  value={
+                    whichTime === 'start'
+                      ? (taskhour ? new Date(`1970-01-01T${taskhour}:00`) : new Date())
+                      : (taskhourEnd ? new Date(`1970-01-01T${taskhourEnd}:00`) : new Date())
+                  }
                   mode="time"
                   is24Hour={true}
                   display="default"
-                  onChange={onChangeTime}
+                  onChange={(event, selectedDate) => {
+                    setShowTimePicker(false);
+                    if (selectedDate) {
+                      const hours = selectedDate.getHours().toString().padStart(2, '0');
+                      const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
+                      if (whichTime === 'start') {
+                        setTaskHour(`${hours}:${minutes}`);
+                      } else {
+                        setTaskHourEnd(`${hours}:${minutes}`);
+                      }
+                    }
+                  }}
                 />
               )}
             </View>
+
             {/* Selector de tipo */}
             <View style={{ marginVertical: 10 }}>
               <Text>Tipo</Text>
