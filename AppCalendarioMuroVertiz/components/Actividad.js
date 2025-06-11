@@ -91,6 +91,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskColor('');
     setTaskLocation('');
     setEditIndex(null);
+    const baseDate = selectedDate ? new Date(selectedDate) : new Date();
+    setStartDate(baseDate);
+    setEndDate(baseDate);
     setModalVisible(true);
     toggleOptions();
   };
@@ -107,7 +110,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
 
   // Crear o editar tarea con todas las propiedades
   const saveTask = () => {
-    if (!selectedDate) {
+    if (!startDate) {
       setError('Selecciona una fecha antes de guardar la tarea.');
       return;
     }
@@ -117,6 +120,27 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     }
     setError('');
     const dateTasks = tasks[selectedDate] || [];
+
+    // --- Lógica para fecha de fin por defecto ---
+    let realEndDate = endDate;
+    if (isRange && taskhour && taskhourEnd) {
+      const [h1, m1] = taskhour.split(':').map(Number);
+      const [h2, m2] = taskhourEnd.split(':').map(Number);
+      if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+        // Si la hora de fin es menor o igual que la de inicio, suma un día
+        realEndDate = new Date(startDate);
+        realEndDate.setDate(realEndDate.getDate() + 1);
+      } else {
+        // Si no, iguala endDate a startDate
+        realEndDate = startDate;
+      }
+    } else if (isRange) {
+      // Si el usuario no ha tocado nada, endDate debe ser igual a startDate
+      realEndDate = startDate;
+    } else {
+      realEndDate = null;
+    }
+
     const newTask = {
       name: taskName,
       type: tasktype,
@@ -124,7 +148,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       color: taskcolor || 'negro',
       location: tasklocation,
       startDate: startDate ? startDate.toISOString() : null,
-      endDate: isRange ? (endDate ? endDate.toISOString() : null) : null,
+      endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
       startHour: taskhour,
       endHour: isRange ? taskhourEnd : null,
     };
@@ -444,7 +468,15 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                       onPress={() => {
                         if (!isRange) {
                           setEndDate(startDate);
-                          setTaskHourEnd(taskhour ? taskhour : '12:00');
+                          if (taskhour) {
+                            // Suma 1 hora a la hora de inicio actual
+                            const [h, m] = taskhour.split(':').map(Number);
+                            const endHour = (h + 1) % 24;
+                            const endStr = `${endHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                            setTaskHourEnd(endStr);
+                          } else {
+                            setTaskHourEnd('13:00');
+                          }
                         }
                         setIsRange(!isRange);
                       }}
@@ -591,8 +623,25 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                       if (selectedDate) {
                         const hours = selectedDate.getHours().toString().padStart(2, '0');
                         const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-                        if (hourPickerMode === 'start') setTaskHour(`${hours}:${minutes}`);
-                        else setTaskHourEnd(`${hours}:${minutes}`);
+                        if (hourPickerMode === 'start') {
+                          setTaskHour(`${hours}:${minutes}`);
+                        } else {
+                          setTaskHourEnd(`${hours}:${minutes}`);
+                          // Comprobar si la hora de fin es menor o igual que la de inicio
+                          if (taskhour) {
+                            const [h1, m1] = taskhour.split(':').map(Number);
+                            const [h2, m2] = [parseInt(hours), parseInt(minutes)];
+                            // Si la hora de fin es menor o igual que la de inicio, suma un día a endDate
+                            if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+                              const newEndDate = new Date(startDate);
+                              newEndDate.setDate(newEndDate.getDate() + 1);
+                              setEndDate(newEndDate);
+                            } else {
+                              // Si no, iguala endDate a startDate
+                              setEndDate(startDate);
+                            }
+                          }
+                        }
                       }
                     }}
                   />
