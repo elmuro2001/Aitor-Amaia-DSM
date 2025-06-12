@@ -129,7 +129,8 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       return;
     }
     setError('');
-    const dateTasks = tasks[selectedDate] || [];
+    const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const dateTasks = tasks[keyDate] || [];
 
     // --- Lógica para fecha de fin por defecto ---
     let realEndDate = endDate;
@@ -137,15 +138,12 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       const [h1, m1] = taskhour.split(':').map(Number);
       const [h2, m2] = taskhourEnd.split(':').map(Number);
       if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
-        // Si la hora de fin es menor o igual que la de inicio, suma un día
         realEndDate = new Date(startDate);
         realEndDate.setDate(realEndDate.getDate() + 1);
       } else {
-        // Si no, iguala endDate a startDate
         realEndDate = startDate;
       }
     } else if (isRange) {
-      // Si el usuario no ha tocado nada, endDate debe ser igual a startDate
       realEndDate = startDate;
     } else {
       realEndDate = null;
@@ -164,17 +162,37 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       endHour: isRange ? taskhourEnd : null,
     };
 
-    let newDateTasks;
-    if (editIndex !== null) {
-      newDateTasks = [...dateTasks];
-      newDateTasks[editIndex] = newTask;
-    } else {
-      newDateTasks = [...dateTasks, newTask];
-    }
-    const newTasks = { ...tasks, [selectedDate]: newDateTasks };
-    setTasks(newTasks);
+    // Guardar en todos los días del rango
+    let newTasks = { ...tasks };
+    if (isRange && realEndDate) {
+      let current = new Date(startDate);
+      current.setHours(0, 0, 0, 0);
+      const last = new Date(realEndDate);
+      last.setHours(0, 0, 0, 0);
 
-    //guardar
+      while (current <= last) {
+        const key = current.toISOString().slice(0, 10);
+        const dayTasks = newTasks[key] ? [...newTasks[key]] : [];
+        if (editIndex !== null && key === keyDate) {
+          dayTasks[editIndex] = newTask;
+        } else {
+          dayTasks.push(newTask);
+        }
+        newTasks[key] = dayTasks;
+        current.setDate(current.getDate() + 1);
+      }
+    } else {
+      // Solo un día
+      const dayTasks = newTasks[keyDate] ? [...newTasks[keyDate]] : [];
+      if (editIndex !== null) {
+        dayTasks[editIndex] = newTask;
+      } else {
+        dayTasks.push(newTask);
+      }
+      newTasks[keyDate] = dayTasks;
+    }
+
+    setTasks(newTasks);
     await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
 
     //reset al cerrar el modal tras guardar
@@ -190,31 +208,18 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Borrar tarea
-const deleteTask = async (index) => {
-  const dateTasks = tasks[selectedDate] || [];
-  const newDateTasks = dateTasks.filter((_, i) => i !== index);
-  const newTasks = { ...tasks, [selectedDate]: newDateTasks };
-  setTasks(newTasks);
-  await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks)); // <-- GUARDA EN ASYNCSTORAGE
-};
+  const deleteTask = async (index) => {
+    const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const dateTasks = tasks[keyDate] || [];
+    const newDateTasks = dateTasks.filter((_, i) => i !== index);
+    const newTasks = { ...tasks, [keyDate]: newDateTasks };
+    setTasks(newTasks);
+    await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
+  };
 
   // Editar tarea
-  const startEditTask = (index) => {
-    const task = tasks[selectedDate][index];
+  const startEditTask = (task, index) => {
     setTaskName(task.name);
-
-    // Si es un rango, separar hora inicio y fin
-    if (task.hour && task.hour.includes('-')) {
-      const [start, end] = task.hour.split('-').map(s => s.trim());
-      setTaskHour(start);
-      setTaskHourEnd(end);
-      setIsRange(true);
-    } else {
-      setTaskHour(task.hour || '');
-      setTaskHourEnd('');
-      setIsRange(false);
-    }
-
     setTaskType(task.type || 'evento');
     setTaskDescription(task.description);
     setTaskColor(task.color);
@@ -224,9 +229,18 @@ const deleteTask = async (index) => {
     setModalVisible(true);
     setStartDate(task.startDate ? new Date(task.startDate) : new Date());
     setEndDate(task.endDate ? new Date(task.endDate) : new Date());
-    setTaskHour(task.startHour || '');
-    setTaskHourEnd(task.endHour || '');
-    setIsRange(!!task.endHour);
+
+    // Si es un rango, separar hora inicio y fin
+    if (task.hour && task.hour.includes('-')) {
+      const [start, end] = task.hour.split('-').map(s => s.trim());
+      setTaskHour(start);
+      setTaskHourEnd(end);
+      setIsRange(true);
+    } else {
+      setTaskHour(task.startHour || task.hour || '');
+      setTaskHourEnd(task.endHour || '');
+      setIsRange(!!task.endHour);
+    }
   };
 
   // Mostrar modal de solo vista
@@ -402,7 +416,7 @@ const deleteTask = async (index) => {
                 <TouchableOpacity
                   onPress={() => {
                     setViewModalVisible(false);
-                    startEditTask(viewTaskIndex);
+                    startEditTask(viewTask, viewTaskIndex);
                   }}
                   style={{ marginHorizontal: 8 }}
                 >
@@ -515,7 +529,7 @@ const deleteTask = async (index) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>{editIndex !== null ? 'Editar' : 'Crear'} tarea para {selectedDate}</Text>
+            <Text>{editIndex !== null ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
             {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}
             <TextInput
               placeholder="Nombre de la tarea"
@@ -727,7 +741,7 @@ const deleteTask = async (index) => {
                 <Picker.Item label="Evento" value="evento" />
                 <Picker.Item label="Tarea" value="tarea" />
               </Picker>
-            </View> 
+            </View>
             {/* Mostrar el check solo si es tarea */}
             {tasktype === 'tarea' && editIndex !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
