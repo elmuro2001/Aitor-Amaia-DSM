@@ -124,7 +124,8 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       return;
     }
     setError('');
-    const dateTasks = tasks[selectedDate] || [];
+    const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const dateTasks = tasks[keyDate] || [];
 
     // --- Lógica para fecha de fin por defecto ---
     let realEndDate = endDate;
@@ -165,7 +166,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     } else {
       newDateTasks = [...dateTasks, newTask];
     }
-    const newTasks = { ...tasks, [selectedDate]: newDateTasks };
+    const newTasks = { ...tasks, [keyDate]: newDateTasks };
     setTasks(newTasks);
 
     //guardar
@@ -184,17 +185,18 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Borrar tarea
-const deleteTask = async (index) => {
-  const dateTasks = tasks[selectedDate] || [];
-  const newDateTasks = dateTasks.filter((_, i) => i !== index);
-  const newTasks = { ...tasks, [selectedDate]: newDateTasks };
-  setTasks(newTasks);
-  await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks)); // <-- GUARDA EN ASYNCSTORAGE
-};
+  const deleteTask = async (index) => {
+    const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const dateTasks = tasks[keyDate] || [];
+    const newDateTasks = dateTasks.filter((_, i) => i !== index);
+    const newTasks = { ...tasks, [keyDate]: newDateTasks };
+    setTasks(newTasks);
+    await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
+  };
 
   // Editar tarea
   const startEditTask = (index) => {
-    const task = tasks[selectedDate][index];
+    const task = tasks[keyDate][index];
     setTaskName(task.name);
 
     // Si es un rango, separar hora inicio y fin
@@ -675,7 +677,7 @@ const deleteTask = async (index) => {
                 <Picker.Item label="Evento" value="evento" />
                 <Picker.Item label="Tarea" value="tarea" />
               </Picker>
-            </View> 
+            </View>
             {/* Mostrar el check solo si es tarea */}
             {tasktype === 'tarea' && editIndex !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
