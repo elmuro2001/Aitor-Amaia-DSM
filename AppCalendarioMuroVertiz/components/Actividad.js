@@ -133,15 +133,12 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       const [h1, m1] = taskhour.split(':').map(Number);
       const [h2, m2] = taskhourEnd.split(':').map(Number);
       if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
-        // Si la hora de fin es menor o igual que la de inicio, suma un día
         realEndDate = new Date(startDate);
         realEndDate.setDate(realEndDate.getDate() + 1);
       } else {
-        // Si no, iguala endDate a startDate
         realEndDate = startDate;
       }
     } else if (isRange) {
-      // Si el usuario no ha tocado nada, endDate debe ser igual a startDate
       realEndDate = startDate;
     } else {
       realEndDate = null;
@@ -159,17 +156,37 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       endHour: isRange ? taskhourEnd : null,
     };
 
-    let newDateTasks;
-    if (editIndex !== null) {
-      newDateTasks = [...dateTasks];
-      newDateTasks[editIndex] = newTask;
-    } else {
-      newDateTasks = [...dateTasks, newTask];
-    }
-    const newTasks = { ...tasks, [keyDate]: newDateTasks };
-    setTasks(newTasks);
+    // Guardar en todos los días del rango
+    let newTasks = { ...tasks };
+    if (isRange && realEndDate) {
+      let current = new Date(startDate);
+      current.setHours(0, 0, 0, 0);
+      const last = new Date(realEndDate);
+      last.setHours(0, 0, 0, 0);
 
-    //guardar
+      while (current <= last) {
+        const key = current.toISOString().slice(0, 10);
+        const dayTasks = newTasks[key] ? [...newTasks[key]] : [];
+        if (editIndex !== null && key === keyDate) {
+          dayTasks[editIndex] = newTask;
+        } else {
+          dayTasks.push(newTask);
+        }
+        newTasks[key] = dayTasks;
+        current.setDate(current.getDate() + 1);
+      }
+    } else {
+      // Solo un día
+      const dayTasks = newTasks[keyDate] ? [...newTasks[keyDate]] : [];
+      if (editIndex !== null) {
+        dayTasks[editIndex] = newTask;
+      } else {
+        dayTasks.push(newTask);
+      }
+      newTasks[keyDate] = dayTasks;
+    }
+
+    setTasks(newTasks);
     await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
 
     //reset al cerrar el modal tras guardar
