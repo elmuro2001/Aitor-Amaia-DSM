@@ -20,8 +20,6 @@ const CalendarComponent = () => {
   const [currentYear, setCurrentYear] = useState('');
   const [refreshFlag, setRefreshFlag] = useState(false);
 
-
-
   // UseEffect carga datos al recargar el componente
   useEffect(() => {
     // Actualizar el mes y año al cargar el componente

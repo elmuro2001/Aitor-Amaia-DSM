@@ -171,4 +171,19 @@ export default StyleSheet.create({
         borderWidth: 0,
         elevation: 0,
     },
+    taskItem: {
+        backgroundColor: '#f5f5f5', // gris clarito
+        borderRadius: 12,
+        padding: 12,
+        marginBottom: 8,
+        // Sombra para Android
+        elevation: 3,
+        // Sombra para iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 });
