@@ -5,7 +5,8 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CheckBox } from 'react-native-elements';
-
+import { useEffect } from 'react';
+import { requestCalendarPermissions, getCalendarEvents, getAllCalendarIds } from '../servicios/calendar_connection';
 
 import styles from '../styles/CalendarioStyle';
 import dimensiones from '../config/dimensiones';
@@ -74,7 +75,47 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
   const [showHourPicker, setShowHourPicker] = useState(false);
   const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
-  AsyncStorage.clear();
+
+  const [externalEvents, setExternalEvents] = useState([]); // Estados para los eventos importados del movil
+  // AsyncStorage.clear();
+
+  // Carga inicial de eventos externos
+  useEffect(() => {
+    const loadExternalEvents = async () => {
+      const granted = await requestCalendarPermissions();
+      if (!granted) return;
+
+      // Si tienes getAllCalendarIds, úsalo, si no, usa getCalendarEvents directamente con los ids que quieras
+      const calendarIds = await getAllCalendarIds();
+      const start = new Date(selectedDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(selectedDate);
+      end.setHours(23, 59, 59, 999);
+
+      const events = await getCalendarEvents(calendarIds, start, end);
+
+      // Mapea los eventos externos a tu formato
+      const mapped = events.map(ev => ({
+        id: ev.id + '_external',
+        name: ev.title,
+        type: 'evento',
+        description: ev.notes || '',
+        color: '#2196F3',
+        location: ev.location || '',
+        startDate: ev.startDate,
+        endDate: ev.endDate,
+        startHour: new Date(ev.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        endHour: ev.endDate ? new Date(ev.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+        external: true,
+      }));
+
+      setExternalEvents(mapped);
+    };
+
+    console.log('Eventos externos importados:', mapped);
+
+    loadExternalEvents();
+  }, [selectedDate]);
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -217,7 +258,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTasks(newTasks);
     await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
 
-    //reset al cerrar el modal tras guardar
+    // Reset al cerrar el modal tras guardar
     setTaskName('');
     setTaskHour('');
     setTaskType('evento');
@@ -271,6 +312,14 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setViewModalVisible(true);
   };
 
+  console.log('Tareas propias para', selectedDate, ':', tasks[selectedDate]);
+
+  const allEvents = [
+    ...(tasks[selectedDate] || []),
+    ...externalEvents,
+  ];
+
+  console.log('Eventos y tareas mostrados en la lista:', allEvents);
 
   return (
     <View style={{ flex: 1, position: 'relative' }}>
@@ -292,10 +341,13 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       >
         <FlatList
           contentContainerStyle={{ paddingRight: 20 }}
-          data={tasks[selectedDate] || []}
+          data={allEvents}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => openViewModal(item)}>
+            <TouchableOpacity
+              onPress={() => !item.external && openViewModal(item)}
+              disabled={item.external} // Opcional: deshabilita acciones para externos
+            >
               <View
                 style={{
                   backgroundColor: '#f5f5f5',
@@ -314,7 +366,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
               >
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: 'bold', color: item.color || '#333', fontSize: 16 }}>
-                    {item.name}
+                    {item.name}{item.external && ' (calendario)'}
                   </Text>
                   {item.type === 'evento' && item.startDate && item.startHour && (
                     <Text style={{ color: '#666', fontSize: 14 }}>
@@ -556,7 +608,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-           <Text>{editTaskId ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
+            <Text>{editTaskId ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
             {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}
             <TextInput
               placeholder="Nombre de la tarea"
