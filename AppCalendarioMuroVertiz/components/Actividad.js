@@ -463,7 +463,7 @@ const deleteTask = async (index) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>{editIndex !== null ? 'Editar' : 'Crear'} tarea para {selectedDate}</Text>
+            <Text>{editIndex !== null ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
             {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}
             <TextInput
               placeholder="Nombre de la tarea"
