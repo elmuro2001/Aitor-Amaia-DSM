@@ -160,4 +160,15 @@ export default StyleSheet.create({
         backgroundColor: '#333',
         opacity: 0.5,
     },
+    checkBoxCompact: {
+        padding: 0,
+        margin: 0,
+        width: 22,
+        height: 22,
+        minWidth: 22,
+        minHeight: 22,
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        elevation: 0,
+    },
 });

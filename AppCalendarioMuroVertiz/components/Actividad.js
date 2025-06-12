@@ -4,6 +4,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CheckBox } from 'react-native-elements';
+
 
 import styles from '../styles/CalendarioStyle';
 import dimensiones from '../config/dimensiones';
@@ -53,6 +55,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [taskcolor, setTaskColor] = useState('#000000');
   const [tasklocation, setTaskLocation] = useState('');
   const [taskDone, setTaskDone] = useState(false);
+  
   const [modalVisible, setModalVisible] = useState(false);
   const [viewTask, setViewTask] = useState(null);
   const [viewTaskIndex, setViewTaskIndex] = useState(null);
@@ -96,9 +99,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskLocation('');
     setTaskDone(false);
     setEditIndex(null);
+
     const baseDate = selectedDate ? new Date(selectedDate) : new Date();
     setStartDate(baseDate);
     setEndDate(baseDate);
+
     setModalVisible(true);
     toggleOptions();
   };
@@ -152,6 +157,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       description: taskdescription,
       color: taskcolor || 'Negro',
       location: tasklocation,
+      done: taskDone,
       startDate: startDate ? startDate.toISOString() : null,
       endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
       startHour: taskhour,
@@ -296,6 +302,29 @@ const deleteTask = async (index) => {
                       })()}
                     </Text>
                   )}
+                  {item.type === 'tarea' && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <CheckBox
+                        checked={tasks[selectedDate][index]?.done} // Siempre consulta el estado actual
+                        onPress={async () => {
+                          const updatedDateTasks = [...(tasks[selectedDate] || [])];
+                          updatedDateTasks[index] = {
+                            ...updatedDateTasks[index],
+                            done: !updatedDateTasks[index].done,
+                          };
+                          const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
+                          setTasks(updatedTasks);
+                          await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                        }}
+                        checkedColor="#4CAF50"
+                        uncheckedColor="#ccc"
+                        containerStyle={styles.checkBoxCompact}
+                        wrapperStyle={{ margin: 0, padding: 0 }}
+                        title=""
+                      />
+                    </View>
+                  )}
+
                 </View>
               </View>
             </TouchableOpacity>
@@ -416,6 +445,29 @@ const deleteTask = async (index) => {
                         }
                       })()}
                     </Text>
+                  )}
+                  {viewTask && viewTask.type === 'tarea' && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                      <CheckBox
+                        checked={tasks[selectedDate][viewTaskIndex]?.done} // Consulta el estado actual
+                        onPress={async () => {
+                          const updatedDateTasks = [...(tasks[selectedDate] || [])];
+                          updatedDateTasks[viewTaskIndex] = {
+                            ...updatedDateTasks[viewTaskIndex],
+                            done: !updatedDateTasks[viewTaskIndex].done,
+                          };
+                          const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
+                          setTasks(updatedTasks);
+                          await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                          setViewTask(prev => ({ ...prev, done: !prev.done })); // Opcional, para refrescar el modal
+                        }}
+                        checkedColor="#4CAF50"
+                        uncheckedColor="#ccc"
+                        containerStyle={styles.checkBoxCompact}
+                        wrapperStyle={{ margin: 0, padding: 0 }}
+                        title=""
+                      />
+                    </View>
                   )}
                   {viewTask.description ? (
                     <View
@@ -679,8 +731,14 @@ const deleteTask = async (index) => {
             {/* Mostrar el check solo si es tarea */}
             {tasktype === 'tarea' && editIndex !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                <Text>Hecha: </Text>
-                <Switch value={taskDone} onValueChange={setTaskDone} />
+                <CheckBox
+                  checked={taskDone}
+                  onPress={() => setTaskDone(!taskDone)}
+                  checkedColor="#4CAF50"
+                  uncheckedColor="#ccc"
+                  containerStyle={{ padding: 0, margin: 0 }}
+                />
+                <Text>Hecha</Text>
               </View>
             )}
             <TextInput
