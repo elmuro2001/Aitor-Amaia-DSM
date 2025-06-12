@@ -22,10 +22,24 @@ const CalendarComponent = () => {
 
 
 
-  // Cargamos el mes y año actual al iniciar el componente
+  // UseEffect carga datos al recargar el componente
   useEffect(() => {
+    // Actualizar el mes y año al cargar el componente
     const today = new Date();
     updateMonthYear(today);
+
+    // Cargar tareas desde AsyncStorage al iniciar el componente
+    const loadTasks = async () => {
+      try {
+        const storedTasks = await AsyncStorage.getItem('TASKS');
+        if (storedTasks) {
+          setTasks(JSON.parse(storedTasks));
+        }
+      } catch (error) {
+        console.log('Error cargando tareas:', error);
+      }
+    };
+    loadTasks();
   }, []);
 
   // Función para actualizar el mes y año en el estado
