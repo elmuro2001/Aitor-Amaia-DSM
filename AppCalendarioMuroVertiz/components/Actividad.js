@@ -195,22 +195,8 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Editar tarea
-  const startEditTask = (index) => {
-    const task = tasks[keyDate][index];
+  const startEditTask = (task, index) => {
     setTaskName(task.name);
-
-    // Si es un rango, separar hora inicio y fin
-    if (task.hour && task.hour.includes('-')) {
-      const [start, end] = task.hour.split('-').map(s => s.trim());
-      setTaskHour(start);
-      setTaskHourEnd(end);
-      setIsRange(true);
-    } else {
-      setTaskHour(task.hour || '');
-      setTaskHourEnd('');
-      setIsRange(false);
-    }
-
     setTaskType(task.type || 'evento');
     setTaskDescription(task.description);
     setTaskColor(task.color);
@@ -220,9 +206,18 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setModalVisible(true);
     setStartDate(task.startDate ? new Date(task.startDate) : new Date());
     setEndDate(task.endDate ? new Date(task.endDate) : new Date());
-    setTaskHour(task.startHour || '');
-    setTaskHourEnd(task.endHour || '');
-    setIsRange(!!task.endHour);
+
+    // Si es un rango, separar hora inicio y fin
+    if (task.hour && task.hour.includes('-')) {
+      const [start, end] = task.hour.split('-').map(s => s.trim());
+      setTaskHour(start);
+      setTaskHourEnd(end);
+      setIsRange(true);
+    } else {
+      setTaskHour(task.startHour || task.hour || '');
+      setTaskHourEnd(task.endHour || '');
+      setIsRange(!!task.endHour);
+    }
   };
 
   // Mostrar modal de solo vista
@@ -375,7 +370,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setViewModalVisible(false);
-                    startEditTask(viewTaskIndex);
+                    startEditTask(viewTask, viewTaskIndex);
                   }}
                   style={{ marginHorizontal: 8 }}
                 >
