@@ -48,6 +48,7 @@ const ColorPicker = ({ selectedColor, onSelect }) => (
 const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
 
   // Estados para las propiedades
+  const [editTaskId, setEditTaskId] = useState(null);
   const [taskName, setTaskName] = useState('');
   const [taskhour, setTaskHour] = useState('');
   const [tasktype, setTaskType] = useState('evento'); // Por defecto "evento"
@@ -55,12 +56,10 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [taskcolor, setTaskColor] = useState('#000000');
   const [tasklocation, setTaskLocation] = useState('');
   const [taskDone, setTaskDone] = useState(false);
-  
+
   const [modalVisible, setModalVisible] = useState(false);
   const [viewTask, setViewTask] = useState(null);
-  const [viewTaskIndex, setViewTaskIndex] = useState(null);
   const [viewModalVisible, setViewModalVisible] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [error, setError] = useState('');
@@ -75,6 +74,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
   const [showHourPicker, setShowHourPicker] = useState(false);
   const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
+  AsyncStorage.clear();
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -98,7 +98,6 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskColor('#000000');
     setTaskLocation('');
     setTaskDone(false);
-    setEditIndex(null);
 
     const baseDate = selectedDate ? new Date(selectedDate) : new Date();
     setStartDate(baseDate);
@@ -130,7 +129,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     }
     setError('');
     const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-    const dateTasks = tasks[keyDate] || [];
+    let newTasks = { ...tasks };
 
     // --- Lógica para fecha de fin por defecto ---
     let realEndDate = endDate;
@@ -149,7 +148,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       realEndDate = null;
     }
 
+    // --- Fin de lógica para fecha de fin por defecto ---
     const newTask = {
+      id: editTaskId || Date.now().toString() + Math.random().toString(36).substr(2, 9),
       name: taskName,
       type: tasktype,
       description: taskdescription,
@@ -162,8 +163,27 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       endHour: isRange ? taskhourEnd : null,
     };
 
+    // Si estamos editando y la fecha ha cambiado, elimina la tarea original del día anterior
+    if (editTaskId) {
+      let originalDate = null;
+      let originalIdx = null;
+      for (const [date, arr] of Object.entries(tasks)) {
+        const idx = arr.findIndex(t => t.id === editTaskId);
+        if (idx !== -1) {
+          originalDate = date;
+          originalIdx = idx;
+          break;
+        }
+      }
+      if (originalDate && originalDate !== keyDate) {
+        // Elimina la tarea del día original por id
+        const oldTasks = [...(tasks[originalDate] || [])];
+        oldTasks.splice(originalIdx, 1);
+        newTasks[originalDate] = oldTasks;
+      }
+    }
+
     // Guardar en todos los días del rango
-    let newTasks = { ...tasks };
     if (isRange && realEndDate) {
       let current = new Date(startDate);
       current.setHours(0, 0, 0, 0);
@@ -173,10 +193,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       while (current <= last) {
         const key = current.toISOString().slice(0, 10);
         const dayTasks = newTasks[key] ? [...newTasks[key]] : [];
-        if (editIndex !== null && key === keyDate) {
-          dayTasks[editIndex] = newTask;
+        const idx = dayTasks.findIndex(t => t.id === newTask.id);
+        if (idx !== -1) {
+          dayTasks[idx] = newTask; // Edita la tarea existente por id
         } else {
-          dayTasks.push(newTask);
+          dayTasks.push(newTask); // Añade nueva si no existe
         }
         newTasks[key] = dayTasks;
         current.setDate(current.getDate() + 1);
@@ -184,10 +205,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     } else {
       // Solo un día
       const dayTasks = newTasks[keyDate] ? [...newTasks[keyDate]] : [];
-      if (editIndex !== null) {
-        dayTasks[editIndex] = newTask;
+      const idx = dayTasks.findIndex(t => t.id === newTask.id);
+      if (idx !== -1) {
+        dayTasks[idx] = newTask; // Edita la tarea existente por id
       } else {
-        dayTasks.push(newTask);
+        dayTasks.push(newTask); // Añade nueva si no existe
       }
       newTasks[keyDate] = dayTasks;
     }
@@ -204,28 +226,27 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setTaskLocation('');
     setTaskDone(false);
     setModalVisible(false);
-    setEditIndex(null);
   };
 
   // Borrar tarea
-  const deleteTask = async (index) => {
+  const deleteTask = async (id) => {
     const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     const dateTasks = tasks[keyDate] || [];
-    const newDateTasks = dateTasks.filter((_, i) => i !== index);
+    const newDateTasks = dateTasks.filter((t) => t.id !== id);
     const newTasks = { ...tasks, [keyDate]: newDateTasks };
     setTasks(newTasks);
     await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
   };
 
   // Editar tarea
-  const startEditTask = (task, index) => {
+  const startEditTask = (task) => {
     setTaskName(task.name);
     setTaskType(task.type || 'evento');
     setTaskDescription(task.description);
     setTaskColor(task.color);
     setTaskLocation(task.location);
     setTaskDone(task.done || false);
-    setEditIndex(index);
+    setEditTaskId(task.id);
     setModalVisible(true);
     setStartDate(task.startDate ? new Date(task.startDate) : new Date());
     setEndDate(task.endDate ? new Date(task.endDate) : new Date());
@@ -244,9 +265,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   };
 
   // Mostrar modal de solo vista
-  const openViewModal = (task, index) => {
+  const openViewModal = (task) => {
     setViewTask(task);
-    setViewTaskIndex(index);
+    setEditTaskId(task.id);
     setViewModalVisible(true);
   };
 
@@ -272,9 +293,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
         <FlatList
           contentContainerStyle={{ paddingRight: 20 }}
           data={tasks[selectedDate] || []}
-          keyExtractor={(_, idx) => idx.toString()}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity onPress={() => openViewModal(item, index)}>
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => openViewModal(item)}>
               <View
                 style={{
                   backgroundColor: '#f5f5f5',
@@ -319,16 +340,19 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                   {item.type === 'tarea' && (
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <CheckBox
-                        checked={tasks[selectedDate][index]?.done} // Siempre consulta el estado actual
+                        checked={(tasks[selectedDate] || []).find(t => t.id === item.id)?.done}
                         onPress={async () => {
                           const updatedDateTasks = [...(tasks[selectedDate] || [])];
-                          updatedDateTasks[index] = {
-                            ...updatedDateTasks[index],
-                            done: !updatedDateTasks[index].done,
-                          };
-                          const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
-                          setTasks(updatedTasks);
-                          await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                          const idx = updatedDateTasks.findIndex(t => t.id === item.id);
+                          if (idx !== -1) {
+                            updatedDateTasks[idx] = {
+                              ...updatedDateTasks[idx],
+                              done: !updatedDateTasks[idx].done,
+                            };
+                            const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
+                            setTasks(updatedTasks);
+                            await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                          }
                         }}
                         checkedColor="#4CAF50"
                         uncheckedColor="#ccc"
@@ -416,7 +440,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setViewModalVisible(false);
-                    startEditTask(viewTask, viewTaskIndex);
+                    startEditTask(viewTask);
                   }}
                   style={{ marginHorizontal: 8 }}
                 >
@@ -425,7 +449,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setViewModalVisible(false);
-                    deleteTask(viewTaskIndex);
+                    deleteTask(viewTask.id); // <-- Cambia aquí: usa el id
                   }}
                 >
                   <Ionicons name="trash" size={24} color="red" />
@@ -463,17 +487,20 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
                   {viewTask && viewTask.type === 'tarea' && (
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                       <CheckBox
-                        checked={tasks[selectedDate][viewTaskIndex]?.done} // Consulta el estado actual
+                        checked={(tasks[selectedDate] || []).find(t => t.id === viewTask?.id)?.done}
                         onPress={async () => {
                           const updatedDateTasks = [...(tasks[selectedDate] || [])];
-                          updatedDateTasks[viewTaskIndex] = {
-                            ...updatedDateTasks[viewTaskIndex],
-                            done: !updatedDateTasks[viewTaskIndex].done,
-                          };
-                          const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
-                          setTasks(updatedTasks);
-                          await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
-                          setViewTask(prev => ({ ...prev, done: !prev.done })); // Opcional, para refrescar el modal
+                          const idx = updatedDateTasks.findIndex(t => t.id === viewTask?.id);
+                          if (idx !== -1) {
+                            updatedDateTasks[idx] = {
+                              ...updatedDateTasks[idx],
+                              done: !updatedDateTasks[idx].done,
+                            };
+                            const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
+                            setTasks(updatedTasks);
+                            await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                            setViewTask(prev => ({ ...prev, done: !prev.done }));
+                          }
                         }}
                         checkedColor="#4CAF50"
                         uncheckedColor="#ccc"
@@ -529,7 +556,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>{editIndex !== null ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
+           <Text>{editTaskId ? 'Editar' : 'Crear'} {tasktype === 'tarea' ? 'tarea' : 'evento'} para {selectedDate}</Text>
             {error ? (<Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>) : null}
             <TextInput
               placeholder="Nombre de la tarea"
@@ -743,7 +770,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
               </Picker>
             </View>
             {/* Mostrar el check solo si es tarea */}
-            {tasktype === 'tarea' && editIndex !== null && (
+            {tasktype === 'tarea' && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                 <CheckBox
                   checked={taskDone}
