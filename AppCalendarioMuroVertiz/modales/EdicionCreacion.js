@@ -204,8 +204,19 @@ const EdicionCreacion = ({
                                 onChange={(event, selectedDate) => {
                                     setShowDatePicker(false);
                                     if (selectedDate) {
-                                        if (datePickerMode === 'start') setStartDate(selectedDate);
-                                        else setEndDate(selectedDate);
+                                        if (datePickerMode === 'start') {
+                                            setStartDate(selectedDate);
+                                            // Si la fecha de fin es anterior a la de inicio, ajústala
+                                            if (endDate && selectedDate > endDate) {
+                                                setEndDate(selectedDate);
+                                            }
+                                        } else {
+                                            setEndDate(selectedDate);
+                                            // Si la fecha de fin es anterior a la de inicio, ajústala
+                                            if (startDate && selectedDate < startDate) {
+                                                setStartDate(selectedDate);
+                                            }
+                                        }
                                     }
                                 }}
                             />
@@ -229,15 +240,13 @@ const EdicionCreacion = ({
                                             setTaskHour(`${hours}:${minutes}`);
                                         } else {
                                             setTaskHourEnd(`${hours}:${minutes}`);
-                                            if (taskhour) {
+                                            if (taskhour && endDate && startDate && endDate.toDateString() === startDate.toDateString()) {
                                                 const [h1, m1] = taskhour.split(':').map(Number);
                                                 const [h2, m2] = [parseInt(hours), parseInt(minutes)];
                                                 if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
                                                     const newEndDate = new Date(startDate);
                                                     newEndDate.setDate(newEndDate.getDate() + 1);
                                                     setEndDate(newEndDate);
-                                                } else {
-                                                    setEndDate(startDate);
                                                 }
                                             }
                                         }

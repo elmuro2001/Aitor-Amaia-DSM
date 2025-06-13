@@ -66,9 +66,8 @@ const SoloVista = ({
                                         const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
                                         const startD = new Date(viewTask.startDate);
                                         const endD = viewTask.endDate ? new Date(viewTask.endDate) : null;
-                                        const sameDay = endD && startD.toDateString() === endD.toDateString();
-
                                         if (viewTask.endHour && endD) {
+                                            const sameDay = startD.toDateString() === endD.toDateString();
                                             if (sameDay) {
                                                 return `${viewTask.startHour} - ${viewTask.endHour} ${dias[startD.getDay()]}, ${startD.getDate()} ${meses[startD.getMonth()]}`;
                                             } else {

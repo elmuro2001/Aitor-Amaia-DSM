@@ -47,12 +47,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const externalEvents = useExternalEvents(selectedDate);
 
   useEffect(() => {
-    if (modalVisible && selectedDate) {
+    if (modalVisible && !editTaskId && selectedDate) {
       setStartDate(new Date(selectedDate));
       setEndDate(new Date(selectedDate));
     }
   }, [modalVisible]);
-
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
