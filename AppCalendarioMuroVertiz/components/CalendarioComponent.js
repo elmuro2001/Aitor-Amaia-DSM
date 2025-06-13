@@ -31,7 +31,17 @@ const CalendarComponent = () => {
       try {
         const storedTasks = await AsyncStorage.getItem('TASKS');
         if (storedTasks) {
-          setTasks(JSON.parse(storedTasks));
+          const parsed = JSON.parse(storedTasks);
+          // MIGRACIÓN: añade id si falta
+          Object.keys(parsed).forEach(date => {
+            parsed[date] = parsed[date].map(task => ({
+              ...task,
+              id: task.id || Date.now().toString() + Math.random().toString(36).slice(2, 11),
+            }));
+          });
+          setTasks(parsed);
+          // Guarda la migración en AsyncStorage
+          await AsyncStorage.setItem('TASKS', JSON.stringify(parsed));
         }
       } catch (error) {
         console.log('Error cargando tareas:', error);
@@ -39,7 +49,7 @@ const CalendarComponent = () => {
     };
     loadTasks();
   }, []);
-
+  
   // Función para actualizar el mes y año en el estado
   const updateMonthYear = (date) => {
     const monthName = date.toLocaleString('default', { month: 'long' });
@@ -58,21 +68,21 @@ const CalendarComponent = () => {
   };
 
   // Construir markedDates con dots de colores
-const markedDates = {};
-Object.entries(tasks).forEach(([date, actividades]) => {
-  if (actividades.length > 0) {
-    markedDates[date] = {
-      dots: actividades.map((act, idx) => ({
-        key: act.name + idx,
-        color: act.color || '#000',
-      })),
-      ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
-    };
+  const markedDates = {};
+  Object.entries(tasks).forEach(([date, actividades]) => {
+    if (actividades.length > 0) {
+      markedDates[date] = {
+        dots: actividades.map((act, idx) => ({
+          key: act.name + idx,
+          color: act.color || '#000',
+        })),
+        ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
+      };
+    }
+  });
+  if (selectedDate && !markedDates[selectedDate]) {
+    markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
   }
-});
-if (selectedDate && !markedDates[selectedDate]) {
-  markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
-}
 
   return (
     <SafeAreaView style={styles.container}>

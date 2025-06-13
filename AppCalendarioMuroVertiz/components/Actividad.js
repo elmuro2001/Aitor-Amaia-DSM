@@ -130,9 +130,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   });
 
   // Borrar tarea
-  const deleteTask = (id) => deleteTaskUtil({
+  const deleteTask = (id, taskStartDate) => deleteTaskUtil({
     id,
-    startDate,
+    startDate: new Date(taskStartDate),
     tasks,
     setTasks,
   });
