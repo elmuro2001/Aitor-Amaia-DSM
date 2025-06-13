@@ -162,14 +162,10 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setViewModalVisible(true);
   };
 
-  console.log('Tareas propias para', selectedDate, ':', tasks[selectedDate]);
-
   const allEvents = [
     ...(tasks[selectedDate] || []),
     ...externalEvents,
   ];
-
-  console.log('Eventos y tareas mostrados en la lista:', allEvents);
 
   return (
     <View style={{ flex: 1, position: 'relative' }}>

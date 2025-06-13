@@ -107,7 +107,6 @@ export const saveTaskUtil = async ({
         dayTasks.push(newTask); // Añade nueva si no existe
       }
       // Log del índice y del id
-      console.log('Índice en el array:', idx !== -1 ? idx : dayTasks.length - 1, 'ID:', newTask.id);
       newTasks[key] = dayTasks;
       current.setDate(current.getDate() + 1);
     }
