@@ -94,6 +94,12 @@ const SoloVista = ({
                                                 };
                                                 const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
                                                 setViewTask(prev => ({ ...prev, done: !prev.done }));
+                                                if (typeof setTasks === 'function') setTasks(updatedTasks);
+                                                try {
+                                                    await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
+                                                } catch (e) {
+                                                    console.error('Error guardando tareas en AsyncStorage:', e);
+                                                }
                                             }
                                         }}
                                         checkedColor="#4CAF50"

@@ -57,7 +57,7 @@ export const saveTaskUtil = async ({
 
   // --- Fin de lógica para fecha de fin por defecto ---
   const newTask = {
-    id: editTaskId || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    id: editTaskId || Date.now().toString() + Math.random().toString(36).slice(2, 11),
     name: taskName,
     type: tasktype,
     description: taskdescription,
@@ -106,6 +106,8 @@ export const saveTaskUtil = async ({
       } else {
         dayTasks.push(newTask); // Añade nueva si no existe
       }
+      // Log del índice y del id
+      console.log('Índice en el array:', idx !== -1 ? idx : dayTasks.length - 1, 'ID:', newTask.id);
       newTasks[key] = dayTasks;
       current.setDate(current.getDate() + 1);
     }

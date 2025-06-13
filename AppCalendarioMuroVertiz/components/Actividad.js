@@ -14,9 +14,8 @@ import SoloVista from '../modales/SoloVista';
 import EdicionCreacion from '../modales/EdicionCreacion';
 import ColorPicker from './ColorPicker';
 import TaskList from './TaskList';
-import useExternalEvents from '../hooks/UseExternalEvents';
+import useExternalEvents from '../hooks/useExternalEvents';
 import { saveTaskUtil, deleteTaskUtil, startEditTaskUtil } from '../servicios/taskUtils';
-
 
 //Componenete
 const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
@@ -74,6 +73,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
 
   // Función para abrir el modal con la actividada específica
   const handleCreate = (type) => {
+    setEditTaskId(null);
     setTaskName('');
     setTaskHour('12:00');
     setTaskHourEnd('');
