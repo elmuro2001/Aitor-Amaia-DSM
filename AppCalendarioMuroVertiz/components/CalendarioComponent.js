@@ -6,10 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import GestorActividades from './Actividad';
 import '../config/CalendarioConfig';
+import './WorkplaceComponent';
 
 import styles from '../styles/CalendarioStyle';
 import CalendarioTheme from '../styles/CalendarioTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import WorkplaceComponent from './WorkplaceComponent';
 
 
 const CalendarComponent = () => {
@@ -162,7 +164,7 @@ const CalendarComponent = () => {
 
         {/* FOOTER */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Footer</Text>
+          <WorkplaceComponent/>
         </View>
 
       </View>

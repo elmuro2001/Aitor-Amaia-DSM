@@ -47,7 +47,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
   const [showHourPicker, setShowHourPicker] = useState(false);
   const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
-  // AsyncStorage.clear();
+  //AsyncStorage.clear();
 
   // Carga inicial de eventos externos
   const externalEvents = useExternalEvents(selectedDate);
