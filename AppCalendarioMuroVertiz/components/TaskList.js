@@ -7,9 +7,13 @@ import dimensiones from '../config/dimensiones';
 import styles from '../styles/CalendarioStyle';
 
 const TaskList = ({ tasks, externalEvents, selectedDate, setTasks, openViewModal }) => {
-  const allEvents = [
+  /* const allEvents = [
     ...(tasks[selectedDate] || []),
     ...externalEvents,
+  ]; */
+  const allEvents = [
+    ...(tasks[selectedDate] || []).filter(t => t.id),
+    ...externalEvents.filter(e => e.id),
   ];
 
   const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
