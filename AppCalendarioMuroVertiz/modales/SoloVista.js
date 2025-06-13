@@ -48,7 +48,7 @@ const SoloVista = ({
                         <TouchableOpacity
                             onPress={() => {
                                 onClose();
-                                deleteTask(viewTask.id, viewTask.startDate);
+                                deleteTask(viewTask.id, viewTask.startDate, viewTask.endDate);
                             }}
                         >
                             <Ionicons name="trash" size={24} color="red" />

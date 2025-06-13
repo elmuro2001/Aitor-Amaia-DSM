@@ -98,7 +98,9 @@ export const saveTaskUtil = async ({
     last.setHours(0, 0, 0, 0);
 
     while (current <= last) {
-      const key = current.toISOString().slice(0, 10);
+      const key = current.getFullYear() + '-' +
+        String(current.getMonth() + 1).padStart(2, '0') + '-' +
+        String(current.getDate()).padStart(2, '0');
       const dayTasks = newTasks[key] ? [...newTasks[key]] : [];
       const idx = dayTasks.findIndex(t => t.id === newTask.id);
       if (idx !== -1) {
@@ -140,13 +142,34 @@ export const saveTaskUtil = async ({
 export const deleteTaskUtil = async ({
   id,
   startDate,
+  endDate,
   tasks,
   setTasks,
 }) => {
-  const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-  const dateTasks = tasks[keyDate] || [];
-  const newDateTasks = dateTasks.filter((t) => t.id !== id);
-  const newTasks = { ...tasks, [keyDate]: newDateTasks };
+  let newTasks = { ...tasks };
+
+  if (endDate) {
+    let current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+    const last = new Date(endDate);
+    last.setHours(0, 0, 0, 0);
+
+    while (current <= last) {
+      const key = current.getFullYear() + '-' +
+        String(current.getMonth() + 1).padStart(2, '0') + '-' +
+        String(current.getDate()).padStart(2, '0');
+      const dayTasks = newTasks[key] ? [...newTasks[key]] : [];
+      const newDateTasks = dayTasks.filter((t) => t.id !== id);
+      newTasks[key] = newDateTasks;
+      current.setDate(current.getDate() + 1);
+    }
+  } else {
+    const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const dateTasks = newTasks[keyDate] || [];
+    const newDateTasks = dateTasks.filter((t) => t.id !== id);
+    newTasks[keyDate] = newDateTasks;
+  }
+
   setTasks(newTasks);
   await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
 };
