@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Button, Modal, StyleSheet, FlatList, Alert, Animated, Switch, Easing } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TouchableOpacity, Animated, } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CheckBox } from 'react-native-elements';
 import { useEffect } from 'react';
-import { requestCalendarPermissions, getCalendarEvents, getAllCalendarIds } from '../servicios/calendar_connection';
 
 import styles from '../styles/CalendarioStyle';
-import dimensiones from '../config/dimensiones';
 import SoloVista from '../modales/SoloVista';
 import EdicionCreacion from '../modales/EdicionCreacion';
 import ColorPicker from './ColorPicker';
@@ -53,12 +47,11 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   const externalEvents = useExternalEvents(selectedDate);
 
   useEffect(() => {
-    if (modalVisible && selectedDate) {
+    if (modalVisible && !editTaskId && selectedDate) {
       setStartDate(new Date(selectedDate));
       setEndDate(new Date(selectedDate));
     }
   }, [modalVisible]);
-
 
   // Animación para el botón de opciones
   const toggleOptions = () => {
@@ -130,9 +123,10 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
   });
 
   // Borrar tarea
-  const deleteTask = (id, taskStartDate) => deleteTaskUtil({
+  const deleteTask = (id, taskStartDate, taskEndDate) => deleteTaskUtil({
     id,
     startDate: new Date(taskStartDate),
+    endDate: taskEndDate ? new Date(taskEndDate) : null,
     tasks,
     setTasks,
   });
