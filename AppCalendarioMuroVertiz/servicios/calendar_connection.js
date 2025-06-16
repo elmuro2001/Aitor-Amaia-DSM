@@ -49,11 +49,11 @@ export async function getAllCalendarIds() {
 
 export async function updateExternalEvent(eventId, { title, startDate, endDate, notes, location }) {
   return await Calendar.updateEventAsync(eventId, {
-    title,
+    title: title || '',
     startDate,
     endDate,
-    notes,
-    location,
+    notes: notes || '',
+    location: location || '',
   });
 }
 

@@ -69,10 +69,20 @@ const EdicionCreacion = ({
                 notes: taskdescription,
                 location: tasklocation,
             });
+            /* console.log('Evento externo editado:', {
+                id: externalEventId,
+                title: taskName,
+                startDate,
+                endDate,
+                notes: taskdescription,
+                location: tasklocation,
+            });
+            console.log('Descripción a guardar:', taskdescription); */
 
             // 2. Fuerza el refresco de eventos externos
             if (typeof setRefreshExternalEvents === 'function') {
                 setRefreshExternalEvents(prev => !prev);
+                console.log('Refrescando eventos externos tras edición');
             }
 
             // 3. Actualiza la copia local (si existe)
@@ -288,12 +298,27 @@ const EdicionCreacion = ({
                                             const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
                                             if (hourPickerMode === 'start') {
                                                 setTaskHour(`${hours}:${minutes}`);
+                                                if (isExternal) {
+                                                    const newStartDate = new Date(startDate);
+                                                    newStartDate.setHours(hours);
+                                                    newStartDate.setMinutes(minutes);
+                                                    newStartDate.setSeconds(0);
+                                                    newStartDate.setMilliseconds(0);
+                                                    setStartDate(newStartDate);
+                                                }
                                             } else {
                                                 setTaskHourEnd(`${hours}:${minutes}`);
+                                                if (isExternal) {
+                                                    const newEndDate = new Date(endDate);
+                                                    newEndDate.setHours(hours);
+                                                    newEndDate.setMinutes(minutes);
+                                                    newEndDate.setSeconds(0);
+                                                    newEndDate.setMilliseconds(0);
+                                                    setEndDate(newEndDate);
+                                                }
                                                 if (taskhour && endDate && startDate && endDate.toDateString() === startDate.toDateString()) {
                                                     const [h1, m1] = taskhour.split(':').map(Number);
-                                                    const [h2, m2] = [parseInt(hours), parseInt(minutes)];
-                                                    if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+                                                    if (hours < h1 || (hours === h1 && minutes <= m1)) {
                                                         const newEndDate = new Date(startDate);
                                                         newEndDate.setDate(newEndDate.getDate() + 1);
                                                         setEndDate(newEndDate);

@@ -52,11 +52,9 @@ const SoloVista = ({
                             onPress={async () => {
                                 onClose();
                                 console.log('Eliminando tarea:', viewTask);
-                                if (isExternal && viewTask?.id) {
-                                    console.log('Eliminando evento externo:', viewTask.id);
+                                if (isExternal && viewTask?.id) {                                    
                                     await deleteExternalEvent(viewTask.id);
                                     if (typeof setRefreshExternalEvents === 'function') {
-                                        console.log('Refrescando eventos externos');
                                         setRefreshExternalEvents(prev => !prev);
                                     }
                                 } else {
