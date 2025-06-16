@@ -46,7 +46,7 @@ const EdicionCreacion = ({
     isExternal,
     externalEventId,
     externalCalendarId,
-}) => {    
+}) => {
     const handleSave = async () => {
         if (isExternal && externalEventId && externalCalendarId) {
             const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -60,6 +60,7 @@ const EdicionCreacion = ({
                 alert('No tienes permisos para editar este evento externo.');
                 return;
             }
+            // 1. Edita el evento externo
             await Calendar.updateEventAsync(externalEventId, {
                 title: taskName,
                 startDate,
@@ -67,6 +68,19 @@ const EdicionCreacion = ({
                 notes: taskdescription,
                 location: tasklocation,
             });
+
+            // 2. Actualiza la copia local (si existe)
+            if (typeof updateLocalTaskByExternalId === 'function') {
+                updateLocalTaskByExternalId(externalEventId, {
+                    name: taskName,
+                    startDate,
+                    endDate,
+                    description: taskdescription,
+                    location: tasklocation,
+                    // ...otros campos si los tienes...
+                });
+            }
+
             setModalVisible(false);
         } else {
             saveTask();
