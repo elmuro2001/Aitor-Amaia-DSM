@@ -19,7 +19,8 @@ const useExternalEvents = (visibleMonth) => {
       const events = await getCalendarEvents(calendarIds, start, end);
 
       const mapped = events.map(ev => ({
-        id: (ev.id ? ev.id : Date.now().toString() + Math.random().toString(36).slice(2, 11)) + '_external',
+        id: ev.id?.toString(), 
+        calendarId: ev.calendarId,
         name: ev.title,
         type: 'evento',
         description: ev.notes || '',

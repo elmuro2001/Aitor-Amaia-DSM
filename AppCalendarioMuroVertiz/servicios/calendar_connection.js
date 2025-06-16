@@ -46,3 +46,13 @@ export async function getAllCalendarIds() {
   const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
   return calendars.map(cal => cal.id);
 }
+
+export async function updateExternalEvent(eventId, { title, startDate, endDate, notes, location }) {
+  return await Calendar.updateEventAsync(eventId, {
+    title,
+    startDate,
+    endDate,
+    notes,
+    location,
+  });
+}

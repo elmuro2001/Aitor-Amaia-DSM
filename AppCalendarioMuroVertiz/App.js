@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import CalendarComponent from './components/CalendarioComponent';
-import useExternalEvents from './hooks/useExternalEvents'; // Asegúrate de importar tu hook
+import useExternalEvents from './hooks/useExternalEvents';
 import React, { useState } from 'react';
 
 function getCurrentMonthString() {

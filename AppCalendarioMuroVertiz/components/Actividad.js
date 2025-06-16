@@ -267,6 +267,9 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
         error={error}
         ColorPicker={ColorPicker}
         styles={styles}
+        isExternal={!!viewTask?.external}
+        externalEventId={viewTask?.id}
+        externalCalendarId={viewTask?.calendarId}
       />
     </View>
   );
