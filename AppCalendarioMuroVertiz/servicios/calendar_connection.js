@@ -28,13 +28,14 @@ export async function createAppCalendar() {
   });
 }
 
-export async function createCalendarEvent(calendarId, { title, startDate, endDate }) {
+export async function createCalendarEvent(calendarId, { title, startDate, endDate, notes, location }) {
   return await Calendar.createEventAsync(calendarId, {
     title,
     startDate,
     endDate,
+    notes,
+    location,
     timeZone: 'GMT',
-    location: 'Mi App',
   });
 }
 
@@ -45,4 +46,18 @@ export async function getCalendarEvents(calendarIds, startDate, endDate) {
 export async function getAllCalendarIds() {
   const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
   return calendars.map(cal => cal.id);
+}
+
+export async function updateExternalEvent(eventId, { title, startDate, endDate, notes, location }) {
+  return await Calendar.updateEventAsync(eventId, {
+    title: title || '',
+    startDate,
+    endDate,
+    notes: notes || '',
+    location: location || '',
+  });
+}
+
+export async function deleteExternalEvent(eventId) {
+  return await Calendar.deleteEventAsync(eventId);
 }

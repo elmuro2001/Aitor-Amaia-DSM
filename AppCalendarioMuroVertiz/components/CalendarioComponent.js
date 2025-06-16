@@ -13,8 +13,7 @@ import CalendarioTheme from '../styles/CalendarioTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import WorkplaceComponent from './WorkplaceComponent';
 
-
-const CalendarComponent = () => {
+const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEvents, setRefreshExternalEvents }) => {
   // Constantes y estados 
   const [tasks, setTasks] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
@@ -23,6 +22,13 @@ const CalendarComponent = () => {
   const [refreshFlag, setRefreshFlag] = useState(false);
   const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);//array para filtrar por workplaces
 
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshExternalEvents(prev => !prev);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // UseEffect carga datos al recargar el componente
   useEffect(() => {
@@ -67,6 +73,12 @@ const CalendarComponent = () => {
     const date = new Date(month.year, month.month - 1);
     updateMonthYear(date);
 
+    // ACTUALIZA EL MES VISIBLE EN EL COMPONENTE SUPERIOR
+    if (setVisibleMonth) {
+      const monthStr = `${month.year}-${String(month.month).padStart(2, '0')}`;
+      setVisibleMonth(monthStr);
+    }
+
     // Forzar rerender suave para evitar problemas de renderizado
     setRefreshFlag(f => !f);
   };
@@ -75,22 +87,23 @@ const CalendarComponent = () => {
 
   const markedDates = {};
 
-    Object.values(tasks).flat().forEach((task) => {
-      const start = task.startDate ? task.startDate.slice(0, 10) : null;
-      const end = task.endDate ? task.endDate.slice(0, 10) : start;
+  // Tareas locales
+  Object.values(tasks).flat().forEach((task) => {
+    const start = task.startDate ? task.startDate.slice(0, 10) : null;
+    const end = task.endDate ? task.endDate.slice(0, 10) : start;
 
-      if (start && end) {
-        let current = new Date(start);
-        const last = new Date(end);
-        while (current <= last) {
-          const key = current.toISOString().slice(0, 10);
-          if (!markedDates[key]) markedDates[key] = { dots: [] };
-          markedDates[key].dots.push({
-            key: (task.id || task.name || '') + key,
-            color: task.color || '#50cebb',
-          });
-          current.setDate(current.getDate() + 1);
-        }
+    if (start && end) {
+      let current = new Date(start);
+      const last = new Date(end);
+      while (current <= last) {
+        const key = current.toISOString().slice(0, 10);
+        if (!markedDates[key]) markedDates[key] = { dots: [] };
+        markedDates[key].dots.push({
+          key: (task.id || task.name || '') + key,
+          color: task.color || '#50cebb',
+        });
+        current.setDate(current.getDate() + 1);
+
       }
     });
 
@@ -111,6 +124,33 @@ const CalendarComponent = () => {
     }
 
 
+
+  // Eventos externos
+  externalEvents.forEach((event) => {
+    const start = event.startDate ? event.startDate.slice(0, 10) : null;
+    const end = event.endDate ? event.endDate.slice(0, 10) : start;
+
+    if (start && end) {
+      let current = new Date(start);
+      const last = new Date(end);
+      while (current <= last) {
+        const key = current.toISOString().slice(0, 10);
+        if (!markedDates[key]) markedDates[key] = { dots: [] };
+        markedDates[key].dots.push({
+          key: (event.id || event.title || '') + key,
+          color: event.color || '#2196F3', // Color para externos
+        });
+        current.setDate(current.getDate() + 1);
+      }
+    }
+  });
+
+  // Marca la fecha seleccionada (manteniendo el estilo original)
+  if (selectedDate) {
+    if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
+    markedDates[selectedDate].selected = true;
+    markedDates[selectedDate].selectedColor = '#c9c9c9';
+  }
 
 
   return (
@@ -185,6 +225,8 @@ const CalendarComponent = () => {
             selectedDate={selectedDate}
             tasks={tasks}
             setTasks={setTasks}
+            refreshExternalEvents={refreshExternalEvents}
+            setRefreshExternalEvents={setRefreshExternalEvents}
           />
         </View>
 

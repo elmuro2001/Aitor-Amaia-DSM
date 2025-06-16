@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Calendar from 'expo-calendar';
+import { createCalendarEvent, getAllCalendarIds } from './calendar_connection';
 
 // Guardar o editar tarea
 export const saveTaskUtil = async ({
@@ -38,9 +40,9 @@ export const saveTaskUtil = async ({
   }
   setError('');
   const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+
   let newTasks = { ...tasks };
 
-  // Lógica para fecha de fin por defecto
   // Lógica para fecha de fin por defecto
   let realEndDate = endDate;
   if (isRange && taskhour && taskhourEnd) {
@@ -62,7 +64,47 @@ export const saveTaskUtil = async ({
     realEndDate = null;
   }
 
-  const newTask = { // Creamos la nueva tarea con todos los campos
+
+  let externalEventId = null;
+  let externalCalendarId = null;
+  if (tasktype === 'evento' && !editTaskId) {
+    try {
+      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      // Busca el primer calendario visible y editable
+      const editableCalendar = calendars.find(
+        cal => cal.allowsModifications && cal.accessLevel === 'owner' && cal.isVisible
+      );
+      if (!editableCalendar) {
+        setError('No se encontró un calendario visible y editable para guardar el evento.');
+        return;
+      }
+      const calendarId = editableCalendar.id;
+      externalEventId = await createCalendarEvent(calendarId, {
+        title: taskName,
+        startDate,
+        endDate: isRange ? realEndDate : startDate,
+        notes: taskdescription,
+        location: tasklocation,
+      });
+      externalCalendarId = calendarId;
+      console.log('Evento creado en calendario visible:', {
+        externalEventId,
+        externalCalendarId,
+        title: taskName,
+        startDate,
+        endDate: isRange ? realEndDate : startDate,
+        notes: taskdescription,
+        location: tasklocation,
+      });
+    } catch (e) {
+      setError('Error creando el evento en el calendario local.');
+      console.log('Error creando evento externo:', e);
+      return;
+    }
+  }
+
+  const newTask = {
+
     id: editTaskId || Date.now().toString() + Math.random().toString(36).slice(2, 11),
     name: taskName,
     type: tasktype,
@@ -74,6 +116,8 @@ export const saveTaskUtil = async ({
     endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
     startHour: taskhour,
     endHour: isRange ? taskhourEnd : null,
+    externalEventId,
+    externalCalendarId,
     taskworkplace: taskworkplace ? taskworkplace : null,
   };
 
@@ -81,20 +125,45 @@ export const saveTaskUtil = async ({
   if (editTaskId) {
     let originalDate = null;
     let originalIdx = null;
+    let originalTask = null;
     for (const [date, arr] of Object.entries(tasks)) {
       const idx = arr.findIndex(t => t.id === editTaskId);
       if (idx !== -1) {
         originalDate = date;
         originalIdx = idx;
+        originalTask = arr[idx];
         break;
       }
     }
     if (originalDate && originalDate !== keyDate) {
-      // Elimina la tarea del día original por id
       const oldTasks = [...(tasks[originalDate] || [])];
       oldTasks.splice(originalIdx, 1);
       newTasks[originalDate] = oldTasks;
     }
+
+    if (
+      originalTask &&
+      originalTask.externalEventId &&
+      originalTask.externalCalendarId
+    ) {
+      try {
+        await Calendar.updateEventAsync(originalTask.externalEventId, {
+          title: taskName,
+          startDate: startDate ? new Date(startDate) : null,
+          endDate: isRange && realEndDate ? new Date(realEndDate) : (startDate ? new Date(startDate) : null),
+          notes: taskdescription,
+          location: tasklocation,
+        });
+        console.log('Evento actualizado en calendario local:', {
+          eventId: originalTask.externalEventId,
+          calendarId: originalTask.externalCalendarId,
+          title: taskName,
+        });
+      } catch (e) {
+        console.log('Error actualizando evento en calendario local:', e);
+      }
+    }
+
   }
 
   const dayTasks = newTasks[keyDate] ? [...newTasks[keyDate]] : [];

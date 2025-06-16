@@ -1,4 +1,8 @@
-import { Modal, View, Text, TextInput, TouchableOpacity, Button, } from 'react-native';
+
+import React from 'react';
+import * as Calendar from 'expo-calendar';
+import { Modal, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
+
 import { Picker } from '@react-native-picker/picker';
 import { CheckBox } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -45,12 +49,64 @@ const EdicionCreacion = ({
     saveTask,
     error,
     ColorPicker,
-    styles
+    styles,
+    isExternal,
+    externalEventId,
+    externalCalendarId,
+    setRefreshExternalEvents,
 }) => {
-
+  
     const [asignacionmodalvisible, setasignacionmodalvisible] = useState(false);
     const [workplaceName, setWorkplaceName] = useState('Seleccionar');
     const [workplaceColor, setWorkplaceColor] = useState('#000');
+  
+    const handleSave = async () => {
+        if (isExternal && externalEventId && externalCalendarId) {
+            const { status } = await Calendar.requestCalendarPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Permiso de calendario denegado');
+                return;
+            }
+            const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+            const calendar = calendars.find(cal => cal.id === externalCalendarId);
+            if (!calendar || !calendar.allowsModifications) {
+                alert('No tienes permisos para editar este evento externo.');
+                return;
+            }
+
+            // 1. Edita el evento externo
+            await Calendar.updateEventAsync(externalEventId, {
+                title: taskName,
+                startDate,
+                endDate,
+                notes: taskdescription,
+                location: tasklocation,
+            });
+
+            // 2. Fuerza el refresco de eventos externos
+            if (typeof setRefreshExternalEvents === 'function') {
+                setRefreshExternalEvents(prev => !prev);
+                console.log('Refrescando eventos externos tras edición');
+            }
+
+            // 3. Actualiza la copia local (si existe)
+            if (typeof updateLocalTaskByExternalId === 'function') {
+                updateLocalTaskByExternalId(externalEventId, {
+                    name: taskName,
+                    startDate,
+                    endDate,
+                    description: taskdescription,
+                    location: tasklocation,
+                });
+            }
+
+            setModalVisible(false);
+        } else {
+            saveTask();
+        }
+    };
+
+
 
     const loadWorkplaces = async () => {
         try {
@@ -78,6 +134,7 @@ const EdicionCreacion = ({
         };
         fetchWorkplaceName();
     }, [taskworkplace, modalVisible]);
+
 
 
     return (
@@ -276,12 +333,28 @@ const EdicionCreacion = ({
                                             const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
                                             if (hourPickerMode === 'start') {
                                                 setTaskHour(`${hours}:${minutes}`);
+                                                if (isExternal) {
+                                                    const newStartDate = new Date(startDate);
+                                                    newStartDate.setHours(hours);
+                                                    newStartDate.setMinutes(minutes);
+                                                    newStartDate.setSeconds(0);
+                                                    newStartDate.setMilliseconds(0);
+                                                    setStartDate(newStartDate);
+                                                }
                                             } else {
                                                 setTaskHourEnd(`${hours}:${minutes}`);
+                                                if (isExternal) {
+                                                    const newEndDate = new Date(endDate);
+                                                    newEndDate.setHours(hours);
+                                                    newEndDate.setMinutes(minutes);
+                                                    newEndDate.setSeconds(0);
+                                                    newEndDate.setMilliseconds(0);
+                                                    setEndDate(newEndDate);
+
+                                                }
                                                 if (taskhour && endDate && startDate && endDate.toDateString() === startDate.toDateString()) {
                                                     const [h1, m1] = taskhour.split(':').map(Number);
-                                                    const [h2, m2] = [parseInt(hours), parseInt(minutes)];
-                                                    if (h2 < h1 || (h2 === h1 && m2 <= m1)) {
+                                                    if (hours < h1 || (hours === h1 && minutes <= m1)) {
                                                         const newEndDate = new Date(startDate);
                                                         newEndDate.setDate(newEndDate.getDate() + 1);
                                                         setEndDate(newEndDate);
@@ -302,10 +375,20 @@ const EdicionCreacion = ({
                             selectedValue={tasktype}
                             onValueChange={setTaskType}
                             style={styles.input}
+
+                            enabled={!isExternal} // <-- Deshabilita si es externo
+
                         >
                             <Picker.Item label="Evento" value="evento" />
                             <Picker.Item label="Tarea" value="tarea" />
                         </Picker>
+
+                        {isExternal && (
+                            <Text style={{ color: '#888', fontSize: 12, marginTop: 2 }}>
+                                No puedes cambiar el tipo de los eventos importados.
+                            </Text>
+                        )}
+
                     </View>
                     {/* Mostrar el check solo si es tarea */}
                     {tasktype === 'tarea' && (
@@ -324,6 +407,7 @@ const EdicionCreacion = ({
                         placeholder="Descripción"
                         value={taskdescription}
                         onChangeText={setTaskDescription}
+
                         style={styles.input}
                     />
                     <Text>Color</Text>
@@ -352,7 +436,7 @@ const EdicionCreacion = ({
                             </Text>
                         </View>
                     </View>
-                    <Button title="Guardar" onPress={saveTask} />
+                    <Button title="Guardar" onPress={handleSave} />
                     <Button title="Cancelar" color="red" onPress={() => setModalVisible(false)} />
                     <AsignacionActividadWorkplaceModal
                         asignacionmodalvisible={asignacionmodalvisible}
