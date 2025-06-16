@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import EdicionBorradoWorkplaceModal from "../modales/EdicionBorradoWorkplace";
 
 
-const WorkplaceComponent = () => {
+const WorkplaceComponent = ({ selectedWorkplaces, setSelectedWorkplaces }) => {
 
     // Definir las variables
     const [workplace, setWorkplace] = useState([]); // Estado para almacenar los workplaces]);
@@ -33,6 +33,16 @@ const WorkplaceComponent = () => {
         loadWorkplaces();
     }, [modalVisible,modalworkplace]);
 
+
+    // Funcion para añadir un workplace al array de workplaces de calendario
+    const AddWorkplace = async (id) => {
+        selectedWorkplaces.includes(id) ?
+            setSelectedWorkplaces(selectedWorkplaces.filter(workplaceId => workplaceId !== id)) : // Si ya está seleccionado, lo quitamos
+            setSelectedWorkplaces([...selectedWorkplaces, id]); // Si no está seleccionado, lo añadimos
+    }
+
+
+
     return (
 
 
@@ -49,8 +59,9 @@ const WorkplaceComponent = () => {
                     data={workplace}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <TouchableOpacity style={{ paddingHorizontal: 10, borderBottomWidth: 1, borderColor: '#ccc' }} onLongPress={() => { setModalWorkplace(true); setSelectedWorkplace(item); }}>
-                            <Text style={{ fontSize: 18, color: item.color }}>{item.name}</Text>
+                        //si el workplace está seleccionado, mostrarlo una burbuj
+                        <TouchableOpacity style={{ paddingHorizontal: 10, borderBottomWidth: 1, borderColor: '#ccc' }} onLongPress={() => { setModalWorkplace(true); setSelectedWorkplace(item); }} onPress={() => AddWorkplace(item.id)}>
+                            <Text style={{ fontSize: 18, color: item.color, fontWeight: selectedWorkplaces.includes(item.id) ? '900' : '300' }}>{item.name}</Text>
                         </TouchableOpacity>
                     )}
                     horizontal={true} // Mostrar la lista horizontalmente

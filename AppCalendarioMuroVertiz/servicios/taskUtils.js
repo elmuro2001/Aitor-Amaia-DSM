@@ -19,12 +19,14 @@ export const saveTaskUtil = async ({
   setTaskLocation,
   setTaskDone,
   setError,
+  setTaskWorkplace,
   taskName,
   tasktype,
   taskdescription,
   taskcolor,
   tasklocation,
   taskDone,
+  taskworkplace,
 }) => {
   if (!startDate) {
     setError('Selecciona una fecha antes de guardar la tarea.');
@@ -60,7 +62,7 @@ export const saveTaskUtil = async ({
     realEndDate = null;
   }
 
-  const newTask = {
+  const newTask = { // Creamos la nueva tarea con todos los campos
     id: editTaskId || Date.now().toString() + Math.random().toString(36).slice(2, 11),
     name: taskName,
     type: tasktype,
@@ -72,6 +74,7 @@ export const saveTaskUtil = async ({
     endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
     startHour: taskhour,
     endHour: isRange ? taskhourEnd : null,
+    taskworkplace: taskworkplace ? taskworkplace : null,
   };
 
   // Si estamos editando y la fecha ha cambiado, elimina la tarea original del día anterior
@@ -105,6 +108,10 @@ export const saveTaskUtil = async ({
 
   setTasks(newTasks);
   await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
+  console.log('Tareas guardadas:', newTasks);
+  console.log('Tarea guardada:', newTask);
+  console.log('workplace:', taskworkplace);
+
 
   // Reset al cerrar el modal tras guardar
   setTaskName('');
@@ -114,7 +121,9 @@ export const saveTaskUtil = async ({
   setTaskColor('');
   setTaskLocation('');
   setTaskDone(false);
+  setTaskWorkplace(null);
   setModalVisible(false);
+  setTaskWorkplace(null);
 };
 
 // Borrar tarea
@@ -169,6 +178,7 @@ export const startEditTaskUtil = ({
   setTaskHour,
   setTaskHourEnd,
   setIsRange,
+  setTaskWorkplace,
 }) => {
   setTaskName(task.name);
   setTaskType(task.type || 'evento');
@@ -180,6 +190,7 @@ export const startEditTaskUtil = ({
   setModalVisible(true);
   setStartDate(task.startDate ? new Date(task.startDate) : new Date());
   setEndDate(task.endDate ? new Date(task.endDate) : new Date());
+  setTaskWorkplace(task.taskworkplace || null);
 
   // Si es un rango, separar hora inicio y fin
   if (task.hour && task.hour.includes('-')) {
