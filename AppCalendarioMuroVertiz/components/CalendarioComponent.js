@@ -1,6 +1,6 @@
 // Importaciones necesarias
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -49,7 +49,7 @@ const CalendarComponent = () => {
     };
     loadTasks();
   }, []);
-  
+
   // Función para actualizar el mes y año en el estado
   const updateMonthYear = (date) => {
     const monthName = date.toLocaleString('default', { month: 'long' });
@@ -69,19 +69,31 @@ const CalendarComponent = () => {
 
   // Construir markedDates con dots de colores
   const markedDates = {};
-  Object.entries(tasks).forEach(([date, actividades]) => {
-    if (actividades.length > 0) {
-      markedDates[date] = {
-        dots: actividades.map((act, idx) => ({
-          key: act.name + idx,
-          color: act.color || '#000',
-        })),
-        ...(date === selectedDate ? { selected: true, selectedColor: '#c9c9c9' } : {}),
-      };
+
+  Object.values(tasks).flat().forEach((task) => {
+    const start = task.startDate ? task.startDate.slice(0, 10) : null;
+    const end = task.endDate ? task.endDate.slice(0, 10) : start;
+
+    if (start && end) {
+      let current = new Date(start);
+      const last = new Date(end);
+      while (current <= last) {
+        const key = current.toISOString().slice(0, 10);
+        if (!markedDates[key]) markedDates[key] = { dots: [] };
+        markedDates[key].dots.push({
+          key: (task.id || task.name || '') + key,
+          color: task.color || '#50cebb',
+        });
+        current.setDate(current.getDate() + 1);
+      }
     }
   });
-  if (selectedDate && !markedDates[selectedDate]) {
-    markedDates[selectedDate] = { selected: true, selectedColor: '#c9c9c9' };
+
+  // Marca la fecha seleccionada (manteniendo el estilo original)
+  if (selectedDate) {
+    if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
+    markedDates[selectedDate].selected = true;
+    markedDates[selectedDate].selectedColor = '#c9c9c9';
   }
 
   return (
@@ -146,7 +158,6 @@ const CalendarComponent = () => {
 
             // Habilitamos el swipe para cambiar de mes
             enableSwipeMonths={true}
-
 
           />
         </View>
