@@ -120,20 +120,45 @@ export const saveTaskUtil = async ({
   if (editTaskId) {
     let originalDate = null;
     let originalIdx = null;
+    let originalTask = null;
     for (const [date, arr] of Object.entries(tasks)) {
       const idx = arr.findIndex(t => t.id === editTaskId);
       if (idx !== -1) {
         originalDate = date;
         originalIdx = idx;
+        originalTask = arr[idx];
         break;
       }
     }
     if (originalDate && originalDate !== keyDate) {
-      // Elimina la tarea del día original por id
       const oldTasks = [...(tasks[originalDate] || [])];
       oldTasks.splice(originalIdx, 1);
       newTasks[originalDate] = oldTasks;
     }
+
+    if (
+      originalTask &&
+      originalTask.externalEventId &&
+      originalTask.externalCalendarId
+    ) {
+      try {
+        await Calendar.updateEventAsync(originalTask.externalEventId, {
+          title: taskName,
+          startDate: startDate ? new Date(startDate) : null,
+          endDate: isRange && realEndDate ? new Date(realEndDate) : (startDate ? new Date(startDate) : null),
+          notes: taskdescription,
+          location: tasklocation,
+        });
+        console.log('Evento actualizado en calendario local:', {
+          eventId: originalTask.externalEventId,
+          calendarId: originalTask.externalCalendarId,
+          title: taskName,
+        });
+      } catch (e) {
+        console.log('Error actualizando evento en calendario local:', e);
+      }
+    }
+
   }
 
   const dayTasks = newTasks[keyDate] ? [...newTasks[keyDate]] : [];
