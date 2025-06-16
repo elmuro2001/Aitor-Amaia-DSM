@@ -46,6 +46,7 @@ const EdicionCreacion = ({
     isExternal,
     externalEventId,
     externalCalendarId,
+    setRefreshExternalEvents,
 }) => {
     const handleSave = async () => {
         if (isExternal && externalEventId && externalCalendarId) {
@@ -69,7 +70,12 @@ const EdicionCreacion = ({
                 location: tasklocation,
             });
 
-            // 2. Actualiza la copia local (si existe)
+            // 2. Fuerza el refresco de eventos externos
+            if (typeof setRefreshExternalEvents === 'function') {
+                setRefreshExternalEvents(prev => !prev);
+            }
+
+            // 3. Actualiza la copia local (si existe)
             if (typeof updateLocalTaskByExternalId === 'function') {
                 updateLocalTaskByExternalId(externalEventId, {
                     name: taskName,
@@ -77,7 +83,6 @@ const EdicionCreacion = ({
                     endDate,
                     description: taskdescription,
                     location: tasklocation,
-                    // ...otros campos si los tienes...
                 });
             }
 

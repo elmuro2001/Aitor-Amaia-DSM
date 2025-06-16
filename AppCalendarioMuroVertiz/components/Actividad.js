@@ -12,7 +12,7 @@ import useExternalEvents from '../hooks/useExternalEvents';
 import { saveTaskUtil, deleteTaskUtil, startEditTaskUtil } from '../servicios/taskUtils';
 
 //Componenete
-const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
+const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvents, setRefreshExternalEvents }) => {
 
   // Estados para las propiedades
   const [editTaskId, setEditTaskId] = useState(null);
@@ -154,6 +154,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
     setViewTask(task);
     setEditTaskId(task.id);
     setViewModalVisible(true);
+    setRefreshExternalEvents={setRefreshExternalEvents}
   };
 
   const allEvents = [
@@ -226,6 +227,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
         setViewTask={setViewTask}
         styles={styles}
         isExternal={!!viewTask?.external}
+        setRefreshExternalEvents={setRefreshExternalEvents}
       />
 
       {/* Modal de edición/creación */}

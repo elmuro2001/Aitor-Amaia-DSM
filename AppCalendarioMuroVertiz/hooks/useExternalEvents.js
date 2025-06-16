@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { requestCalendarPermissions, getCalendarEvents, getAllCalendarIds } from '../servicios/calendar_connection';
 
-const useExternalEvents = (visibleMonth) => {
+const useExternalEvents = (visibleMonth, refreshExternalEvents) => {
   const [externalEvents, setExternalEvents] = useState([]);
 
   useEffect(() => {
@@ -11,7 +11,6 @@ const useExternalEvents = (visibleMonth) => {
 
       const calendarIds = await getAllCalendarIds();
 
-      // visibleMonth: formato 'YYYY-MM' (ejemplo: '2024-06')
       const [year, month] = visibleMonth.split('-').map(Number);
       const start = new Date(year, month - 1, 1, 0, 0, 0, 0);
       const end = new Date(year, month, 0, 23, 59, 59, 999);
@@ -19,7 +18,7 @@ const useExternalEvents = (visibleMonth) => {
       const events = await getCalendarEvents(calendarIds, start, end);
 
       const mapped = events.map(ev => ({
-        id: ev.id?.toString(), 
+        id: ev.id?.toString(),
         calendarId: ev.calendarId,
         name: ev.title,
         type: 'evento',
@@ -37,7 +36,7 @@ const useExternalEvents = (visibleMonth) => {
     };
 
     loadExternalEvents();
-  }, [visibleMonth]);
+  }, [visibleMonth, refreshExternalEvents]);
 
   return externalEvents;
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, View, Text, TouchableOpacity, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CheckBox } from 'react-native-elements';
+import { deleteExternalEvent } from '../servicios/calendar_connection';
 
 const SoloVista = ({
     visible,
@@ -14,7 +15,8 @@ const SoloVista = ({
     setViewTask,
     styles,
     isExternal,
-}) => (    
+    setRefreshExternalEvents,
+}) => (
     <Modal
         visible={visible}
         animationType="slide"
@@ -47,9 +49,19 @@ const SoloVista = ({
                             <Ionicons name="pencil" size={24} color="#2196F3" />
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => {
+                            onPress={async () => {
                                 onClose();
-                                deleteTask(viewTask.id, viewTask.startDate, viewTask.endDate);
+                                console.log('Eliminando tarea:', viewTask);
+                                if (isExternal && viewTask?.id) {
+                                    console.log('Eliminando evento externo:', viewTask.id);
+                                    await deleteExternalEvent(viewTask.id);
+                                    if (typeof setRefreshExternalEvents === 'function') {
+                                        console.log('Refrescando eventos externos');
+                                        setRefreshExternalEvents(prev => !prev);
+                                    }
+                                } else {
+                                    deleteTask(viewTask.id, viewTask.startDate, viewTask.endDate);
+                                }
                             }}
                         >
                             <Ionicons name="trash" size={24} color="red" />

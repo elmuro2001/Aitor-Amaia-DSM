@@ -12,10 +12,11 @@ function getCurrentMonthString() {
 export default function App() {
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [refreshExternalEvents, setRefreshExternalEvents] = useState(false);
   // const externalEvents = useExternalEvents(selectedDate); 
 
   const [visibleMonth, setVisibleMonth] = useState(getCurrentMonthString()); 
-  const externalEvents = useExternalEvents(visibleMonth);
+  const externalEvents = useExternalEvents(visibleMonth, refreshExternalEvents);
 
   return (
     <View style={styles.container}>
@@ -26,6 +27,8 @@ export default function App() {
         setSelectedDate={setSelectedDate}
         externalEvents={externalEvents}
         setVisibleMonth={setVisibleMonth}
+        refreshExternalEvents={refreshExternalEvents}
+        setRefreshExternalEvents={setRefreshExternalEvents}
       />
       <StatusBar style="auto" />
     </View>

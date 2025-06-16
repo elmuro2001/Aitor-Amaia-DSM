@@ -56,3 +56,7 @@ export async function updateExternalEvent(eventId, { title, startDate, endDate, 
     location,
   });
 }
+
+export async function deleteExternalEvent(eventId) {
+  return await Calendar.deleteEventAsync(eventId);
+}

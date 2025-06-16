@@ -11,13 +11,20 @@ import styles from '../styles/CalendarioStyle';
 import CalendarioTheme from '../styles/CalendarioTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const CalendarComponent = ({ externalEvents, setVisibleMonth }) => {
+const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEvents, setRefreshExternalEvents }) => {
   // Constantes y estados 
   const [tasks, setTasks] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
   const [refreshFlag, setRefreshFlag] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshExternalEvents(prev => !prev);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // UseEffect carga datos al recargar el componente
   useEffect(() => {
@@ -122,34 +129,6 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth }) => {
     markedDates[selectedDate].selectedColor = '#c9c9c9';
   }
 
-  /* const markedDates = {};
-
-  Object.values(tasks).flat().forEach((task) => {
-    const start = task.startDate ? task.startDate.slice(0, 10) : null;
-    const end = task.endDate ? task.endDate.slice(0, 10) : start;
-
-    if (start && end) {
-      let current = new Date(start);
-      const last = new Date(end);
-      while (current <= last) {
-        const key = current.toISOString().slice(0, 10);
-        if (!markedDates[key]) markedDates[key] = { dots: [] };
-        markedDates[key].dots.push({
-          key: (task.id || task.name || '') + key,
-          color: task.color || '#50cebb',
-        });
-        current.setDate(current.getDate() + 1);
-      }
-    }
-  });
-
-  // Marca la fecha seleccionada (manteniendo el estilo original)
-  if (selectedDate) {
-    if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
-    markedDates[selectedDate].selected = true;
-    markedDates[selectedDate].selectedColor = '#c9c9c9';
-  } */
-
   return (
     <SafeAreaView style={styles.container}>
 
@@ -222,6 +201,8 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth }) => {
             selectedDate={selectedDate}
             tasks={tasks}
             setTasks={setTasks}
+            refreshExternalEvents={refreshExternalEvents}
+            setRefreshExternalEvents={setRefreshExternalEvents}
           />
         </View>
 
