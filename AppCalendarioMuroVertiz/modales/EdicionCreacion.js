@@ -61,6 +61,7 @@ const EdicionCreacion = ({
                 alert('No tienes permisos para editar este evento externo.');
                 return;
             }
+
             // 1. Edita el evento externo
             await Calendar.updateEventAsync(externalEventId, {
                 title: taskName,
@@ -69,15 +70,6 @@ const EdicionCreacion = ({
                 notes: taskdescription,
                 location: tasklocation,
             });
-            /* console.log('Evento externo editado:', {
-                id: externalEventId,
-                title: taskName,
-                startDate,
-                endDate,
-                notes: taskdescription,
-                location: tasklocation,
-            });
-            console.log('Descripción a guardar:', taskdescription); */
 
             // 2. Fuerza el refresco de eventos externos
             if (typeof setRefreshExternalEvents === 'function') {
@@ -339,10 +331,16 @@ const EdicionCreacion = ({
                             selectedValue={tasktype}
                             onValueChange={setTaskType}
                             style={styles.input}
+                            enabled={!isExternal} // <-- Deshabilita si es externo
                         >
                             <Picker.Item label="Evento" value="evento" />
                             <Picker.Item label="Tarea" value="tarea" />
                         </Picker>
+                        {isExternal && (
+                            <Text style={{ color: '#888', fontSize: 12, marginTop: 2 }}>
+                                No puedes cambiar el tipo de los eventos importados.
+                            </Text>
+                        )}
                     </View>
                     {/* Mostrar el check solo si es tarea */}
                     {tasktype === 'tarea' && (
