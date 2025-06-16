@@ -23,25 +23,23 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
   const [taskcolor, setTaskColor] = useState('#000000');
   const [tasklocation, setTaskLocation] = useState('');
   const [taskDone, setTaskDone] = useState(false);
+  const [taskworkplace, setTaskWorkplace] = useState(null); // Para el workplace asociado a la tarea
 
   const [modalVisible, setModalVisible] = useState(false);
   const [viewTask, setViewTask] = useState(null);
   const [viewModalVisible, setViewModalVisible] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(new Date());
   const [error, setError] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [animation] = useState(new Animated.Value(0));
   const [isRange, setIsRange] = useState(false);
   const [taskhourEnd, setTaskHourEnd] = useState('');
-  const [whichTime, setWhichTime] = useState('start');
   const [startDate, setStartDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
   const [endDate, setEndDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerMode, setDatePickerMode] = useState('start'); // 'start' o 'end'
   const [showHourPicker, setShowHourPicker] = useState(false);
   const [hourPickerMode, setHourPickerMode] = useState('start'); // 'start' o 'end'
-  // AsyncStorage.clear();
+  //AsyncStorage.clear();
 
   // Carga inicial de eventos externos
   const externalEvents = useExternalEvents(selectedDate);
@@ -76,6 +74,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
     setTaskColor('#000000');
     setTaskLocation('');
     setTaskDone(false);
+    setTaskWorkplace(null);
 
     const baseDate = selectedDate ? new Date(selectedDate) : new Date();
     setStartDate(baseDate);
@@ -83,16 +82,6 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
 
     setModalVisible(true);
     toggleOptions();
-  };
-
-  // Mostrar el selector de hora
-  const onChangeTime = (event, selectedDate) => {
-    setShowTimePicker(false);
-    if (selectedDate) {
-      const hours = selectedDate.getHours().toString().padStart(2, '0');
-      const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-      setTaskHour(`${hours}:${minutes}`);
-    }
   };
 
   // Crear o editar tarea con todas las propiedades
@@ -114,12 +103,14 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
     setTaskLocation,
     setTaskDone,
     setError,
+    setTaskWorkplace,
     taskName,
     tasktype,
     taskdescription,
     taskcolor,
     tasklocation,
     taskDone,
+    taskworkplace,
   });
 
   // Borrar tarea
@@ -147,6 +138,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
     setTaskHour,
     setTaskHourEnd,
     setIsRange,
+    setTaskWorkplace,
   });
 
   // Mostrar modal de solo vista
@@ -259,6 +251,8 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
         setTaskHourEnd={setTaskHourEnd}
         taskDone={taskDone}
         setTaskDone={setTaskDone}
+        taskworkplace={taskworkplace}
+        setTaskWorkplace={setTaskWorkplace}
         taskdescription={taskdescription}
         setTaskDescription={setTaskDescription}
         taskcolor={taskcolor}

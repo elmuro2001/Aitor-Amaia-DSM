@@ -6,10 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import GestorActividades from './Actividad';
 import '../config/CalendarioConfig';
+import './WorkplaceComponent';
 
 import styles from '../styles/CalendarioStyle';
 import CalendarioTheme from '../styles/CalendarioTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import WorkplaceComponent from './WorkplaceComponent';
 
 const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEvents, setRefreshExternalEvents }) => {
   // Constantes y estados 
@@ -18,6 +20,8 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);//array para filtrar por workplaces
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -79,7 +83,8 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
     setRefreshFlag(f => !f);
   };
 
-  // Construir markedDates con dots de colores
+  // Construir markedDates con dots de colores   
+
   const markedDates = {};
 
   // Tareas locales
@@ -98,9 +103,27 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
           color: task.color || '#50cebb',
         });
         current.setDate(current.getDate() + 1);
+
       }
+    });
+
+    // Marca la fecha seleccionada (manteniendo el estilo original)
+    if (selectedDate) {
+      if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
+      markedDates[selectedDate].selected = true;
+      markedDates[selectedDate].selectedColor = '#c9c9c9';
     }
-  });
+    //si hay algún workplace seleccionado, filtrar las tareas en funcion del taskworkplace
+    if (selectedWorkplaces.length > 0) {
+      Object.keys(markedDates).forEach(date => {
+        markedDates[date].dots = markedDates[date].dots.filter(dot => {
+          const task = tasks[date]?.find(t => t.id === dot.key.slice(0, -date.length));
+          return task && selectedWorkplaces.includes(task.taskworkplace);
+        });
+      });
+    }
+
+
 
   // Eventos externos
   externalEvents.forEach((event) => {
@@ -128,6 +151,7 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
     markedDates[selectedDate].selected = true;
     markedDates[selectedDate].selectedColor = '#c9c9c9';
   }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -208,7 +232,10 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
 
         {/* FOOTER */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Footer</Text>
+          <WorkplaceComponent
+            selectedWorkplaces={selectedWorkplaces}
+            setSelectedWorkplaces={setSelectedWorkplaces}
+          />
         </View>
 
       </View>

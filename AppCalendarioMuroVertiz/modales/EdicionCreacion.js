@@ -1,9 +1,14 @@
+
 import React from 'react';
 import * as Calendar from 'expo-calendar';
 import { Modal, View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
+
 import { Picker } from '@react-native-picker/picker';
 import { CheckBox } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from 'react';
+import AsignacionActividadWorkplaceModal from './AsignacionActvididad-Workplace';
 
 const EdicionCreacion = ({
     modalVisible,
@@ -33,6 +38,8 @@ const EdicionCreacion = ({
     setTaskHourEnd,
     taskDone,
     setTaskDone,
+    taskworkplace,
+    setTaskWorkplace,
     taskdescription,
     setTaskDescription,
     taskcolor,
@@ -48,6 +55,11 @@ const EdicionCreacion = ({
     externalCalendarId,
     setRefreshExternalEvents,
 }) => {
+  
+    const [asignacionmodalvisible, setasignacionmodalvisible] = useState(false);
+    const [workplaceName, setWorkplaceName] = useState('Seleccionar');
+    const [workplaceColor, setWorkplaceColor] = useState('#000');
+  
     const handleSave = async () => {
         if (isExternal && externalEventId && externalCalendarId) {
             const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -93,6 +105,37 @@ const EdicionCreacion = ({
             saveTask();
         }
     };
+
+
+
+    const loadWorkplaces = async () => {
+        try {
+            const workplaces = JSON.parse(await AsyncStorage.getItem('WORKPLACES')) || [];
+            return workplaces;
+        } catch (error) {
+            console.error('Error al cargar los workplaces:', error);
+            return [];
+        }
+
+    }
+
+    useEffect(() => {
+        const fetchWorkplaceName = async () => {
+            if (taskworkplace) {
+                const workplaces = await loadWorkplaces();
+                const workplace = workplaces.find(w => w.id === taskworkplace);
+                setWorkplaceName(workplace ? workplace.name : 'Seleccionar');
+                setWorkplaceColor(workplace ? workplace.color : '#000');
+            } else {
+                setWorkplaceName('Seleccionar');
+                setWorkplaceColor('#000');
+            }
+
+        };
+        fetchWorkplaceName();
+    }, [taskworkplace, modalVisible]);
+
+
 
     return (
         <Modal
@@ -307,6 +350,7 @@ const EdicionCreacion = ({
                                                     newEndDate.setSeconds(0);
                                                     newEndDate.setMilliseconds(0);
                                                     setEndDate(newEndDate);
+
                                                 }
                                                 if (taskhour && endDate && startDate && endDate.toDateString() === startDate.toDateString()) {
                                                     const [h1, m1] = taskhour.split(':').map(Number);
@@ -331,16 +375,20 @@ const EdicionCreacion = ({
                             selectedValue={tasktype}
                             onValueChange={setTaskType}
                             style={styles.input}
+
                             enabled={!isExternal} // <-- Deshabilita si es externo
+
                         >
                             <Picker.Item label="Evento" value="evento" />
                             <Picker.Item label="Tarea" value="tarea" />
                         </Picker>
+
                         {isExternal && (
                             <Text style={{ color: '#888', fontSize: 12, marginTop: 2 }}>
                                 No puedes cambiar el tipo de los eventos importados.
                             </Text>
                         )}
+
                     </View>
                     {/* Mostrar el check solo si es tarea */}
                     {tasktype === 'tarea' && (
@@ -359,6 +407,7 @@ const EdicionCreacion = ({
                         placeholder="Descripción"
                         value={taskdescription}
                         onChangeText={setTaskDescription}
+
                         style={styles.input}
                     />
                     <Text>Color</Text>
@@ -369,9 +418,32 @@ const EdicionCreacion = ({
                         onChangeText={setTaskLocation}
                         style={styles.input}
                     />
-
+                    <View style={{ marginVertical: 10 }}>
+                        <Text>Workplace</Text>
+                        <View
+                            style={{
+                                backgroundColor: workplaceColor,
+                                borderRadius: 16,
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                alignSelf: 'flex-start', // para que la burbuja se ajuste al texto
+                                marginVertical: 6,
+                                marginBottom: 10,
+                            }}
+                        >
+                            <Text onPress={() => { setasignacionmodalvisible(true); }} style={{ color: '#fff', fontWeight: 'bold', textShadowColor: '#000'}}>
+                                {workplaceName}
+                            </Text>
+                        </View>
+                    </View>
                     <Button title="Guardar" onPress={handleSave} />
                     <Button title="Cancelar" color="red" onPress={() => setModalVisible(false)} />
+                    <AsignacionActividadWorkplaceModal
+                        asignacionmodalvisible={asignacionmodalvisible}
+                        setasignacionmodalvisible={setasignacionmodalvisible}
+                        taskworkplace={taskworkplace}
+                        setTaskWorkplace={setTaskWorkplace}
+                    />
                 </View>
             </View>
         </Modal>
