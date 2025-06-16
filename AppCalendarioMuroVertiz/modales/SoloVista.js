@@ -12,8 +12,9 @@ const SoloVista = ({
     startEditTask,
     deleteTask,
     setViewTask,
-    styles
-}) => (
+    styles,
+    isExternal,
+}) => (    
     <Modal
         visible={visible}
         animationType="slide"

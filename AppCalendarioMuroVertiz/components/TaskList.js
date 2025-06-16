@@ -41,8 +41,7 @@ const TaskList = ({ tasks, externalEvents, selectedDate, setTasks, openViewModal
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => !item.external && openViewModal(item)}
-      disabled={item.external}
+      onPress={() => openViewModal(item)}
     >
       <View style={styles.taskItem}>
         <View style={{ flex: 1 }}>

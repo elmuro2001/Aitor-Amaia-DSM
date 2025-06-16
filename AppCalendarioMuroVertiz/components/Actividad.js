@@ -225,6 +225,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks }) => {
         deleteTask={deleteTask}
         setViewTask={setViewTask}
         styles={styles}
+        isExternal={!!viewTask?.external}
       />
 
       {/* Modal de edición/creación */}
