@@ -4,7 +4,7 @@ import CalendarComponent from './components/CalendarioComponent';
 import useExternalEvents from './hooks/useExternalEvents';
 import React, { useState } from 'react';
 
-function getCurrentMonthString() {
+function getCurrentMonthString() { 
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }

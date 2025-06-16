@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Calendar from 'expo-calendar';
+import { createCalendarEvent, getAllCalendarIds } from './calendar_connection';
 
 // Guardar o editar tarea
 export const saveTaskUtil = async ({
@@ -36,9 +38,9 @@ export const saveTaskUtil = async ({
   }
   setError('');
   const keyDate = startDate ? startDate.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+
   let newTasks = { ...tasks };
 
-  // Lógica para fecha de fin por defecto
   // Lógica para fecha de fin por defecto
   let realEndDate = endDate;
   if (isRange && taskhour && taskhourEnd) {
@@ -60,6 +62,44 @@ export const saveTaskUtil = async ({
     realEndDate = null;
   }
 
+  let externalEventId = null;
+  let externalCalendarId = null;
+  if (tasktype === 'evento' && !editTaskId) {
+    try {
+      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      // Busca el primer calendario visible y editable
+      const editableCalendar = calendars.find(
+        cal => cal.allowsModifications && cal.accessLevel === 'owner' && cal.isVisible
+      );
+      if (!editableCalendar) {
+        setError('No se encontró un calendario visible y editable para guardar el evento.');
+        return;
+      }
+      const calendarId = editableCalendar.id;
+      externalEventId = await createCalendarEvent(calendarId, {
+        title: taskName,
+        startDate,
+        endDate: isRange ? realEndDate : startDate,
+        notes: taskdescription,
+        location: tasklocation,
+      });
+      externalCalendarId = calendarId;
+      console.log('Evento creado en calendario visible:', {
+        externalEventId,
+        externalCalendarId,
+        title: taskName,
+        startDate,
+        endDate: isRange ? realEndDate : startDate,
+        notes: taskdescription,
+        location: tasklocation,
+      });
+    } catch (e) {
+      setError('Error creando el evento en el calendario local.');
+      console.log('Error creando evento externo:', e);
+      return;
+    }
+  }
+
   const newTask = {
     id: editTaskId || Date.now().toString() + Math.random().toString(36).slice(2, 11),
     name: taskName,
@@ -72,6 +112,8 @@ export const saveTaskUtil = async ({
     endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
     startHour: taskhour,
     endHour: isRange ? taskhourEnd : null,
+    externalEventId,
+    externalCalendarId,
   };
 
   // Si estamos editando y la fecha ha cambiado, elimina la tarea original del día anterior

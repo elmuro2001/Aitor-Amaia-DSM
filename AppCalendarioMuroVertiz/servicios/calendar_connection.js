@@ -28,13 +28,14 @@ export async function createAppCalendar() {
   });
 }
 
-export async function createCalendarEvent(calendarId, { title, startDate, endDate }) {
+export async function createCalendarEvent(calendarId, { title, startDate, endDate, notes, location }) {
   return await Calendar.createEventAsync(calendarId, {
     title,
     startDate,
     endDate,
+    notes,
+    location,
     timeZone: 'GMT',
-    location: 'Mi App',
   });
 }
 

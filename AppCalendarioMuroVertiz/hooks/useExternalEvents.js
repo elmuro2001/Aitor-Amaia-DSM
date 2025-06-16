@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { requestCalendarPermissions, getCalendarEvents, getAllCalendarIds } from '../servicios/calendar_connection';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const useExternalEvents = (visibleMonth, refreshExternalEvents) => {
   const [externalEvents, setExternalEvents] = useState([]);
@@ -17,20 +18,37 @@ const useExternalEvents = (visibleMonth, refreshExternalEvents) => {
 
       const events = await getCalendarEvents(calendarIds, start, end);
 
-      const mapped = events.map(ev => ({
-        id: ev.id?.toString(),
-        calendarId: ev.calendarId,
-        name: ev.title,
-        type: 'evento',
-        description: ev.notes || '',
-        color: '#2196F3',
-        location: ev.location || '',
-        startDate: ev.startDate,
-        endDate: ev.endDate,
-        startHour: new Date(ev.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        endHour: ev.endDate ? new Date(ev.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
-        external: true,
-      }));
+      let localExternalIds = [];
+      try {
+        const storedTasks = await AsyncStorage.getItem('TASKS');
+        if (storedTasks) {
+          const parsed = JSON.parse(storedTasks);
+          localExternalIds = Object.values(parsed)
+            .flat()
+            .map(task => task.externalEventId)
+            .filter(Boolean)
+            .map(id => id.toString());
+        }
+      } catch (e) {
+        console.log('Error leyendo TASKS:', e);
+      }
+
+      const mapped = events
+        .filter(ev => !localExternalIds.includes(ev.id?.toString()))
+        .map(ev => ({
+          id: ev.id?.toString(),
+          calendarId: ev.calendarId,
+          name: ev.title,
+          type: 'evento',
+          description: ev.notes || '',
+          color: '#2196F3',
+          location: ev.location || '',
+          startDate: ev.startDate,
+          endDate: ev.endDate,
+          startHour: new Date(ev.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          endHour: ev.endDate ? new Date(ev.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+          external: true,
+        }));
 
       setExternalEvents(mapped);
     };
