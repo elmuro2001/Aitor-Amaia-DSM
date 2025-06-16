@@ -8,7 +8,7 @@ import ColorPicker from '../components/ColorPicker';
 
 const CreacionWorkplaceModal = ({ modalVisible, setModalVisible }) => { //importamos la variable modalVisible y setModalVisible para controlar la visibilidad del modal
     const [workplaceName, setWorkplaceName] = useState('');
-    const [workplaceColor, setWorkplaceColor] = useState('#FFFFFF'); // Color por defecto blanco
+    const [workplaceColor, setWorkplaceColor] = useState('#000'); // Color por defecto negro
     const [workplaceId, setWorkplaceId] = useState('');
 
     // Función para generar un ID único
@@ -23,13 +23,10 @@ const CreacionWorkplaceModal = ({ modalVisible, setModalVisible }) => { //import
         if (!workplaceName) {
             alert('Por favor, ingresa un nombre para el workplace.');
             return;
-
-
         }
         //si el nombre que se quiere ingresar ya está en uso, se le pide al usuario que ingrese otro nombre
         const existingWorkplaces = JSON.parse(await AsyncStorage.getItem('WORKPLACES')) || [];
         const isNameTaken = existingWorkplaces.some(workplace => workplace.name === workplaceName);
-        console.log('coincidencia', isNameTaken);
 
         if (isNameTaken) {
             alert('El nombre del workplace ya está en uso. Por favor, ingresa otro nombre.');
@@ -48,7 +45,6 @@ const CreacionWorkplaceModal = ({ modalVisible, setModalVisible }) => { //import
             existingWorkplaces.push(newWorkplace);
             await AsyncStorage.setItem('WORKPLACES', JSON.stringify(existingWorkplaces));
             setModalVisible(false); //cerrar el modal después de crear el workplace
-            console.log('Workplace creado:', newWorkplace);
 
             // Limpiar los campos después de crear el workplace
             setWorkplaceName(''); // Limpiar el campo de nombre

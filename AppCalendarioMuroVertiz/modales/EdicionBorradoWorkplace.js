@@ -11,14 +11,11 @@ const EdicionBorradoWorkplaceModal = ({ modalworkplace, setModalWorkplace, selec
     const id = selectedWorkplace.id;
     const [name, setName] = React.useState(selectedWorkplace.name);
     const [color, setColor] = React.useState(selectedWorkplace.color);
-    console.log('workplace seleccionado', selectedWorkplace);
 
 
 
     // Función para manejar la edición del workplace
     const handleEditWorkplace = async () => {
-
-        console.log('Editar workplace:', selectedWorkplace);
 
         if (!name) {
             alert('Por favor, ingresa un nombre para el workplace.');
@@ -47,7 +44,6 @@ const EdicionBorradoWorkplaceModal = ({ modalworkplace, setModalWorkplace, selec
             await AsyncStorage.setItem('WORKPLACES', JSON.stringify(updatedWorkplaces));
             setModalWorkplace(false); //cerrar el modal después de editar el workplace
             setSelectedWorkplace(null); // Limpiar el workplace seleccionado
-            console.log('Workplace editado:', updatedWorkplace);
         } catch (error) {
             console.error('Error al editar el workplace:', error);
         }
@@ -64,10 +60,19 @@ const EdicionBorradoWorkplaceModal = ({ modalworkplace, setModalWorkplace, selec
         const existingWorkplaces = JSON.parse(await AsyncStorage.getItem('WORKPLACES')) || [];
         const updatedWorkplaces = existingWorkplaces.filter(workplace => workplace.id !== selectedWorkplace.id);
         await AsyncStorage.setItem('WORKPLACES', JSON.stringify(updatedWorkplaces));
+
+
+        //Borrar la referencia al workplace borrado en las tareas
+        const existingTasks = JSON.parse(await AsyncStorage.getItem('TASKS')) || {};
+        // Iterar sobre las tareas y eliminar la referencia al workplace borrado
+        Object.keys(existingTasks).forEach(date => {
+            existingTasks[date] = existingTasks[date].filter(task => task.taskworkplace !== selectedWorkplace.id);
+        });
+        // Guardar las tareas actualizadas en AsyncStorage
+        await AsyncStorage.setItem('TASKS', JSON.stringify(existingTasks));
+
         setModalWorkplace(false); // Cerrar el modal después de borrar el workplace
         setSelectedWorkplace(null); // Limpiar el workplace seleccionado
-
-        console.log('Borrar workplace:', selectedWorkplace);
     };
 
     return (
@@ -78,7 +83,6 @@ const EdicionBorradoWorkplaceModal = ({ modalworkplace, setModalWorkplace, selec
             onRequestClose={() => {
                 setModalWorkplace(false);
                 setSelectedWorkplace(null); // Limpiar el workplace seleccionado al cerrar el modal
-                console.log('Modal cerrado');
             }}
         >
             <View style={styles.modalContainer}>

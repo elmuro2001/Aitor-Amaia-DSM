@@ -4,16 +4,16 @@ import styles from '../styles/CalendarioStyle';
 
 const COLORS = [
   { name: 'Negro', value: '#000000' },
-  { name: 'Blanco', value: '#FFFFFF' },
-  { name: 'Gris', value: '#808080' },
-  { name: 'Rojo', value: '#FF0000' },
-  { name: 'Naranja', value: '#FFA500' },
-  { name: 'Amarillo', value: '#FFFF00' },
-  { name: 'Verde claro', value: '#90EE90' },
-  { name: 'Verde oscuro', value: '#006400' },
+  { name: 'Gris', value: '#505050' },
+    { name: 'Blanco', value: '#AAAAAA' },
+  { name: 'Rojo', value: '#FF2020' },
+  { name: 'Naranja', value: '#FFA520' },
+  { name: 'Amarillo', value: '#FFFF20' },
+  { name: 'Verde oscuro', value: '#80EE00' },
+  { name: 'Verde claro', value: '#00EE80' },
   { name: 'Cyan', value: '#00FFFF' },
-  { name: 'Azul', value: '#0000FF' },
-  { name: 'Morado', value: '#800080' },
+  { name: 'Azul', value: '#0040FF' },
+  { name: 'Morado', value: '#8040FF' },
   { name: 'Fuxia', value: '#FF00FF' },
 ];
 

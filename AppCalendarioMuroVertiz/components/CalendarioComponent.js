@@ -21,6 +21,8 @@ const CalendarComponent = () => {
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);//array para filtrar por workplaces
+
 
   // UseEffect carga datos al recargar el componente
   useEffect(() => {
@@ -69,34 +71,47 @@ const CalendarComponent = () => {
     setRefreshFlag(f => !f);
   };
 
-  // Construir markedDates con dots de colores
+  // Construir markedDates con dots de colores   
+
   const markedDates = {};
 
-  Object.values(tasks).flat().forEach((task) => {
-    const start = task.startDate ? task.startDate.slice(0, 10) : null;
-    const end = task.endDate ? task.endDate.slice(0, 10) : start;
+    Object.values(tasks).flat().forEach((task) => {
+      const start = task.startDate ? task.startDate.slice(0, 10) : null;
+      const end = task.endDate ? task.endDate.slice(0, 10) : start;
 
-    if (start && end) {
-      let current = new Date(start);
-      const last = new Date(end);
-      while (current <= last) {
-        const key = current.toISOString().slice(0, 10);
-        if (!markedDates[key]) markedDates[key] = { dots: [] };
-        markedDates[key].dots.push({
-          key: (task.id || task.name || '') + key,
-          color: task.color || '#50cebb',
-        });
-        current.setDate(current.getDate() + 1);
+      if (start && end) {
+        let current = new Date(start);
+        const last = new Date(end);
+        while (current <= last) {
+          const key = current.toISOString().slice(0, 10);
+          if (!markedDates[key]) markedDates[key] = { dots: [] };
+          markedDates[key].dots.push({
+            key: (task.id || task.name || '') + key,
+            color: task.color || '#50cebb',
+          });
+          current.setDate(current.getDate() + 1);
+        }
       }
-    }
-  });
+    });
 
-  // Marca la fecha seleccionada (manteniendo el estilo original)
-  if (selectedDate) {
-    if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
-    markedDates[selectedDate].selected = true;
-    markedDates[selectedDate].selectedColor = '#c9c9c9';
-  }
+    // Marca la fecha seleccionada (manteniendo el estilo original)
+    if (selectedDate) {
+      if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
+      markedDates[selectedDate].selected = true;
+      markedDates[selectedDate].selectedColor = '#c9c9c9';
+    }
+    //si hay algún workplace seleccionado, filtrar las tareas en funcion del taskworkplace
+    if (selectedWorkplaces.length > 0) {
+      Object.keys(markedDates).forEach(date => {
+        markedDates[date].dots = markedDates[date].dots.filter(dot => {
+          const task = tasks[date]?.find(t => t.id === dot.key.slice(0, -date.length));
+          return task && selectedWorkplaces.includes(task.taskworkplace);
+        });
+      });
+    }
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -175,7 +190,10 @@ const CalendarComponent = () => {
 
         {/* FOOTER */}
         <View style={styles.footer}>
-          <WorkplaceComponent/>
+          <WorkplaceComponent
+            selectedWorkplaces={selectedWorkplaces}
+            setSelectedWorkplaces={setSelectedWorkplaces}
+          />
         </View>
 
       </View>
