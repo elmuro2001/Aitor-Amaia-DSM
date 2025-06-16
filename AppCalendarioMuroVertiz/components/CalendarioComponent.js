@@ -105,26 +105,16 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
         current.setDate(current.getDate() + 1);
 
       }
-    });
-
-    // Marca la fecha seleccionada (manteniendo el estilo original)
-    if (selectedDate) {
-      if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
-      markedDates[selectedDate].selected = true;
-      markedDates[selectedDate].selectedColor = '#c9c9c9';
     }
-    //si hay algún workplace seleccionado, filtrar las tareas en funcion del taskworkplace
-    if (selectedWorkplaces.length > 0) {
-      Object.keys(markedDates).forEach(date => {
-        markedDates[date].dots = markedDates[date].dots.filter(dot => {
-          const task = tasks[date]?.find(t => t.id === dot.key.slice(0, -date.length));
-          return task && selectedWorkplaces.includes(task.taskworkplace);
-        });
-      });
-    }
+  });
 
-
-
+  // Marca la fecha seleccionada (manteniendo el estilo original)
+  if (selectedDate) {
+    if (!markedDates[selectedDate]) markedDates[selectedDate] = { dots: [] };
+    markedDates[selectedDate].selected = true;
+    markedDates[selectedDate].selectedColor = '#c9c9c9';
+  }
+  
   // Eventos externos
   externalEvents.forEach((event) => {
     const start = event.startDate ? event.startDate.slice(0, 10) : null;
@@ -152,6 +142,15 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
     markedDates[selectedDate].selectedColor = '#c9c9c9';
   }
 
+  //si hay algún workplace seleccionado, filtrar las tareas en funcion del taskworkplace
+  if (selectedWorkplaces.length > 0) {
+    Object.keys(markedDates).forEach(date => {
+      markedDates[date].dots = markedDates[date].dots.filter(dot => {
+        const task = tasks[date]?.find(t => t.id === dot.key.slice(0, -date.length));
+        return task && selectedWorkplaces.includes(task.taskworkplace);
+      });
+    });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
