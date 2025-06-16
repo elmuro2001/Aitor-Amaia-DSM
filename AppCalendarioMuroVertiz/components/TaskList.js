@@ -7,13 +7,33 @@ import dimensiones from '../config/dimensiones';
 import styles from '../styles/CalendarioStyle';
 
 const TaskList = ({ tasks, externalEvents, selectedDate, setTasks, openViewModal }) => {
-  /* const allEvents = [
-    ...(tasks[selectedDate] || []),
-    ...externalEvents,
-  ]; */
   const allEvents = [
-    ...(tasks[selectedDate] || []).filter(t => t.id),
-    ...externalEvents.filter(e => e.id),
+    // Tareas locales que incluyen el día seleccionado en su rango
+    ...Object.values(tasks).flat().filter(t => {
+      const start = t.startDate ? t.startDate.slice(0, 10) : null;
+      const end = t.endDate ? t.endDate.slice(0, 10) : start;
+      return (
+        selectedDate &&
+        start &&
+        end &&
+        selectedDate >= start &&
+        selectedDate <= end &&
+        t.id // solo tareas válidas
+      );
+    }),
+    // Eventos externos que incluyen el día seleccionado en su rango
+    ...externalEvents.filter(e => {
+      const start = e.startDate ? e.startDate.slice(0, 10) : null;
+      const end = e.endDate ? e.endDate.slice(0, 10) : start;
+      return (
+        selectedDate &&
+        start &&
+        end &&
+        selectedDate >= start &&
+        selectedDate <= end &&
+        e.id
+      );
+    }),
   ];
 
   const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
