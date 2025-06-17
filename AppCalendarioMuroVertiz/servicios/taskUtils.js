@@ -134,6 +134,33 @@ export const saveTaskUtil = async ({
     }
   }
 
+  // Definimos bien las horas
+  let localStartDate = startDate;
+  let localEndDate = realEndDate;
+
+  if (tasktype === 'evento') {
+    // Si es evento, reconstruye la fecha/hora local igual que para el evento externo
+    const [year, month, day] = [
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    ];
+    const [h, m] = taskhour ? taskhour.split(':').map(Number) : [0, 0];
+    localStartDate = new Date(year, month, day, h, m, 0, 0);
+
+    if (isRange && realEndDate && taskhourEnd) {
+      const [eyear, emonth, eday] = [
+        realEndDate.getFullYear(),
+        realEndDate.getMonth(),
+        realEndDate.getDate()
+      ];
+      const [eh, em] = taskhourEnd.split(':').map(Number);
+      localEndDate = new Date(eyear, emonth, eday, eh, em, 0, 0);
+    } else if (isRange) {
+      localEndDate = localStartDate;
+    }
+  }
+
   let newTask;
   if (editTaskId && originalTask) { // Si estamos editando no crea nueva ID
     newTask = {
@@ -144,8 +171,8 @@ export const saveTaskUtil = async ({
       color: taskcolor || 'Negro',
       location: tasklocation,
       done: taskDone,
-      startDate: startDate ? startDate.toISOString() : null,
-      endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
+      startDate: localStartDate ? localStartDate.toISOString() : null,
+      endDate: isRange ? (localEndDate ? localEndDate.toISOString() : null) : null,
       startHour: taskhour,
       endHour: isRange ? taskhourEnd : null,
       taskworkplace: taskworkplace ? taskworkplace : null,
@@ -199,8 +226,8 @@ export const saveTaskUtil = async ({
       try {
         await Calendar.updateEventAsync(originalTask.externalEventId, {
           title: taskName,
-          startDate: startDate ? new Date(startDate) : null,
-          endDate: isRange && realEndDate ? new Date(realEndDate) : (startDate ? new Date(startDate) : null),
+          startDate: localStartDate,
+          endDate: isRange && localEndDate ? localEndDate : localStartDate,
           notes: taskdescription,
           location: tasklocation,
         });
@@ -254,6 +281,26 @@ export const deleteTaskUtil = async ({
   setTasks,
 }) => {
   let newTasks = { ...tasks };
+
+  // Busca la tarea a borrar para ver si tiene evento externo
+  let taskToDelete = null;
+  for (const arr of Object.values(tasks)) {
+    const found = arr.find(t => t.id === id);
+    if (found) {
+      taskToDelete = found;
+      break;
+    }
+  }
+
+  // Si tiene evento externo, bórralo también del calendario
+  if (taskToDelete && taskToDelete.externalEventId && taskToDelete.externalCalendarId) {
+    try {
+      await Calendar.deleteEventAsync(taskToDelete.externalEventId);
+      console.log('Evento externo borrado:', taskToDelete.externalEventId);
+    } catch (e) {
+      console.log('Error borrando evento externo:', e);
+    }
+  }
 
   if (endDate) {
     let current = new Date(startDate);
