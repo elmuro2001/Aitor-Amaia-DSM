@@ -12,7 +12,7 @@ import useExternalEvents from '../hooks/useExternalEvents';
 import { saveTaskUtil, deleteTaskUtil, startEditTaskUtil } from '../servicios/taskUtils';
 
 //Componenete
-const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvents, setRefreshExternalEvents }) => {
+const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvents, setRefreshExternalEvents, setRefreshWorkplaces}) => {
 
   // Estados para las propiedades
   const [editTaskId, setEditTaskId] = useState(null);
@@ -268,6 +268,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
         isExternal={!!viewTask?.external && editTaskId !== null}
         externalEventId={viewTask?.id}
         externalCalendarId={viewTask?.calendarId}
+        setRefreshWorkplaces={setRefreshWorkplaces}
       />
     </View>
   );

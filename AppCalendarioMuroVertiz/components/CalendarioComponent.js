@@ -19,8 +19,11 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
   const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const [currentYear, setCurrentYear] = useState('');
+  const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);
+
+
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);//array para filtrar por workplaces
+  const [refreshWorkplaces, setRefreshWorkplaces] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -220,6 +223,7 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
         {/* GESTOR DE ACTIVIDADES */}
         <View>
           <GestorActividades
+            setRefreshWorkplaces={setRefreshWorkplaces}
             selectedDate={selectedDate}
             tasks={tasks}
             setTasks={setTasks}
@@ -231,6 +235,7 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
         {/* FOOTER */}
         <View style={styles.footer}>
           <WorkplaceComponent
+            refreshWorkplaces={refreshWorkplaces}
             selectedWorkplaces={selectedWorkplaces}
             setSelectedWorkplaces={setSelectedWorkplaces}
           />

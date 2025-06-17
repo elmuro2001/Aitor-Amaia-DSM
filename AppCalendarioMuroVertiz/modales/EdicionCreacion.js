@@ -54,8 +54,8 @@ const EdicionCreacion = ({
     externalEventId,
     externalCalendarId,
     setRefreshExternalEvents,
+    setRefreshWorkplaces,
 }) => {
-  
     const [asignacionmodalvisible, setasignacionmodalvisible] = useState(false);
     const [workplaceName, setWorkplaceName] = useState('Seleccionar');
     const [workplaceColor, setWorkplaceColor] = useState('#000');
@@ -130,10 +130,15 @@ const EdicionCreacion = ({
                 setWorkplaceName('Seleccionar');
                 setWorkplaceColor('#000');
             }
+            //setRefreshWorkplaces(prev => !prev); // Forzar el refresco de workplaces
 
         };
         fetchWorkplaceName();
     }, [taskworkplace, modalVisible]);
+
+    useEffect(() => {
+        setRefreshWorkplaces(prev => !prev); // Forzar el refresco de workplaces
+    }, [asignacionmodalvisible, modalVisible]);
 
 
 

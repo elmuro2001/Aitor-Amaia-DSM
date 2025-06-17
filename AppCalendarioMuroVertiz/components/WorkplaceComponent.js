@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import EdicionBorradoWorkplaceModal from "../modales/EdicionBorradoWorkplace";
 
 
-const WorkplaceComponent = ({ selectedWorkplaces, setSelectedWorkplaces }) => {
+const WorkplaceComponent = ({ selectedWorkplaces, setSelectedWorkplaces, refreshWorkplaces }) => {
 
     // Definir las variables
     const [workplace, setWorkplace] = useState([]); // Estado para almacenar los workplaces]);
@@ -30,7 +30,7 @@ const WorkplaceComponent = ({ selectedWorkplaces, setSelectedWorkplaces }) => {
     // Cargar los workplaces al montar el componente
     useEffect(() => {
         loadWorkplaces();
-    }, [modalVisible,modalworkplace]);
+    }, [modalVisible,modalworkplace,refreshWorkplaces]);
 
 
     // Funcion para añadir un workplace al array de workplaces de calendario
