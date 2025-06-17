@@ -376,7 +376,6 @@ const EdicionCreacion = ({
                             selectedValue={tasktype}
                             onValueChange={setTaskType}
                             style={styles.input}
-
                             enabled={!isExternal} // <-- Deshabilita si es externo
 
                         >

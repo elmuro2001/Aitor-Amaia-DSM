@@ -22,7 +22,6 @@ const CalendarComponent = ({ externalEvents, setVisibleMonth, refreshExternalEve
   const [refreshFlag, setRefreshFlag] = useState(false);
   const [selectedWorkplaces, setSelectedWorkplaces] = useState([]);//array para filtrar por workplaces
 
-
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshExternalEvents(prev => !prev);

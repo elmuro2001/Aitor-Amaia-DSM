@@ -5,7 +5,6 @@ import { CheckBox } from 'react-native-elements';
 import { deleteExternalEvent } from '../servicios/calendar_connection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const SoloVista = ({
     visible,
     onClose,
@@ -19,10 +18,7 @@ const SoloVista = ({
     styles,
     isExternal,
     setRefreshExternalEvents,
-}) => {
-
-
-
+}) => {    
     return (
         <Modal
             visible={visible}
@@ -163,6 +159,7 @@ const SoloVista = ({
                             title="Cerrar"
                             onPress={() => {
                                 onClose();
+                                setViewTask(null);
                                 if (typeof setEditTaskId === 'function') setEditTaskId(null);
                             }}
                         />
@@ -172,6 +169,5 @@ const SoloVista = ({
         </Modal>
     );
 }
-
 
 export default SoloVista;

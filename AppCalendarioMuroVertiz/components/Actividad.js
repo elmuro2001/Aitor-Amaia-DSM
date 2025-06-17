@@ -75,6 +75,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
     setTaskLocation('');
     setTaskDone(false);
     setTaskWorkplace(null);
+    setViewTask(null);
 
     const baseDate = selectedDate ? new Date(selectedDate) : new Date();
     setStartDate(baseDate);
@@ -264,7 +265,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
         error={error}
         ColorPicker={ColorPicker}
         styles={styles}
-        isExternal={!!viewTask?.external}
+        isExternal={!!viewTask?.external && editTaskId !== null}
         externalEventId={viewTask?.id}
         externalCalendarId={viewTask?.calendarId}
       />
