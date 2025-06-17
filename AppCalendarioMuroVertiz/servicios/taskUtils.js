@@ -64,7 +64,6 @@ export const saveTaskUtil = async ({
     realEndDate = null;
   }
 
-
   let externalEventId = null;
   let externalCalendarId = null;
   if (tasktype === 'evento' && !editTaskId) {
@@ -79,10 +78,31 @@ export const saveTaskUtil = async ({
         return;
       }
       const calendarId = editableCalendar.id;
+
+      // Conversión hora
+      const [year, month, day] = [
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate()
+      ];
+      const [h, m] = taskhour ? taskhour.split(':').map(Number) : [0, 0];
+      const finalStartDate = new Date(year, month, day, h, m, 0, 0);
+
+      let finalEndDate = null;
+      if (isRange && realEndDate && taskhourEnd) {
+        const [eyear, emonth, eday] = [
+          realEndDate.getFullYear(),
+          realEndDate.getMonth(),
+          realEndDate.getDate()
+        ];
+        const [eh, em] = taskhourEnd.split(':').map(Number);
+        finalEndDate = new Date(eyear, emonth, eday, eh, em, 0, 0);
+      }
+
       externalEventId = await createCalendarEvent(calendarId, {
         title: taskName,
-        startDate,
-        endDate: isRange ? realEndDate : startDate,
+        startDate: finalStartDate,
+        endDate: isRange && finalEndDate ? finalEndDate : finalStartDate,
         notes: taskdescription,
         location: tasklocation,
       });
@@ -103,23 +123,53 @@ export const saveTaskUtil = async ({
     }
   }
 
-  const newTask = {
+  let originalTask = null;
+  if (editTaskId) {
+    for (const [date, arr] of Object.entries(tasks)) {
+      const idx = arr.findIndex(t => t.id === editTaskId);
+      if (idx !== -1) {
+        originalTask = arr[idx];
+        break;
+      }
+    }
+  }
 
-    id: editTaskId || Date.now().toString() + Math.random().toString(36).slice(2, 11),
-    name: taskName,
-    type: tasktype,
-    description: taskdescription,
-    color: taskcolor || 'Negro',
-    location: tasklocation,
-    done: taskDone,
-    startDate: startDate ? startDate.toISOString() : null,
-    endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
-    startHour: taskhour,
-    endHour: isRange ? taskhourEnd : null,
-    externalEventId,
-    externalCalendarId,
-    taskworkplace: taskworkplace ? taskworkplace : null,
-  };
+  let newTask;
+  if (editTaskId && originalTask) { // Si estamos editando no crea nueva ID
+    newTask = {
+      id: originalTask.id,
+      name: taskName,
+      type: tasktype,
+      description: taskdescription,
+      color: taskcolor || 'Negro',
+      location: tasklocation,
+      done: taskDone,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
+      startHour: taskhour,
+      endHour: isRange ? taskhourEnd : null,
+      taskworkplace: taskworkplace ? taskworkplace : null,
+      externalEventId: originalTask.externalEventId || null,
+      externalCalendarId: originalTask.externalCalendarId || null,
+    };
+  } else { // Si estamos creando una nueva tarea genera un nuevo ID
+    newTask = {
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 11),
+      name: taskName,
+      type: tasktype,
+      description: taskdescription,
+      color: taskcolor || 'Negro',
+      location: tasklocation,
+      done: taskDone,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: isRange ? (realEndDate ? realEndDate.toISOString() : null) : null,
+      startHour: taskhour,
+      endHour: isRange ? taskhourEnd : null,
+      externalEventId,
+      externalCalendarId,
+      taskworkplace: taskworkplace ? taskworkplace : null,
+    };
+  }
 
   // Si estamos editando y la fecha ha cambiado, elimina la tarea original del día anterior
   if (editTaskId) {
