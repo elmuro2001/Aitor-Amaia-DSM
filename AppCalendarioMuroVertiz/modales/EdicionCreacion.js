@@ -59,6 +59,7 @@ const EdicionCreacion = ({
     const [asignacionmodalvisible, setasignacionmodalvisible] = useState(false);
     const [workplaceName, setWorkplaceName] = useState('Seleccionar');
     const [workplaceColor, setWorkplaceColor] = useState('#000');
+
   
     const handleSave = async () => {
         if (isExternal && externalEventId && externalCalendarId) {
@@ -390,8 +391,8 @@ const EdicionCreacion = ({
                         )}
 
                     </View>
-                    {/* Mostrar el check solo si es tarea */}
-                    {tasktype === 'tarea' && (
+                    {/* Mostrar el check solo si es tarea y no estamos editando */}
+                    {tasktype === 'tarea' && editTaskId !== null && (
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                             <CheckBox
                                 checked={taskDone}

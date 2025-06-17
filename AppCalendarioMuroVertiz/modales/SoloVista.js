@@ -101,8 +101,7 @@ const SoloVista = ({
                                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                                         <CheckBox
                                             checked={(tasks[selectedDate] || []).find(t => t.id === viewTask?.id)?.done}
-                                            onPress={async () => {
-                                                console.log('se ha pulsado el checkbox de la tarea:');
+                                            onPress={async () => {                                                
                                                 const updatedDateTasks = [...(tasks[selectedDate] || [])];
                                                 const idx = updatedDateTasks.findIndex(t => t.id === viewTask?.id);
                                                 if (idx !== -1) {
@@ -110,14 +109,12 @@ const SoloVista = ({
                                                         ...updatedDateTasks[idx],
                                                         done: !updatedDateTasks[idx].done,
                                                     };
-                                                    console.log('Hecha de tarea:', updatedDateTasks[idx].done);
                                                     const updatedTasks = { ...tasks, [selectedDate]: updatedDateTasks };
                                                     setTasks(updatedTasks);
                                                     setViewTask(prev => ({ ...prev, done: !prev.done }));
                                                     if (typeof setTasks === 'function') setTasks(updatedTasks);
                                                     try {
                                                         await AsyncStorage.setItem('TASKS', JSON.stringify(updatedTasks));
-                                                        console.log('Tareas actualizadas en AsyncStorage:', updatedTasks);
                                                     } catch (e) {
                                                         console.error('Error guardando tareas en AsyncStorage:', e);
                                                     }
