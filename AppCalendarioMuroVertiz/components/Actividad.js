@@ -213,6 +213,7 @@ const GestorActividades = ({ selectedDate, tasks, setTasks, refreshExternalEvent
         onClose={() => setViewModalVisible(false)}
         viewTask={viewTask}
         tasks={tasks}
+        setTasks={setTasks}
         selectedDate={selectedDate}
         startEditTask={startEditTask}
         deleteTask={deleteTask}
