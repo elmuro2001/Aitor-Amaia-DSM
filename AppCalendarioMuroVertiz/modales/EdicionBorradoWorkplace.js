@@ -12,8 +12,6 @@ const EdicionBorradoWorkplaceModal = ({ modalworkplace, setModalWorkplace, selec
     const [name, setName] = React.useState(selectedWorkplace.name);
     const [color, setColor] = React.useState(selectedWorkplace.color);
 
-
-
     // Función para manejar la edición del workplace
     const handleEditWorkplace = async () => {
 

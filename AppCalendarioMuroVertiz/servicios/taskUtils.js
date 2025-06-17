@@ -107,15 +107,6 @@ export const saveTaskUtil = async ({
         location: tasklocation,
       });
       externalCalendarId = calendarId;
-      console.log('Evento creado en calendario visible:', {
-        externalEventId,
-        externalCalendarId,
-        title: taskName,
-        startDate,
-        endDate: isRange ? realEndDate : startDate,
-        notes: taskdescription,
-        location: tasklocation,
-      });
     } catch (e) {
       setError('Error creando el evento en el calendario local.');
       console.log('Error creando evento externo:', e);
@@ -231,11 +222,6 @@ export const saveTaskUtil = async ({
           notes: taskdescription,
           location: tasklocation,
         });
-        console.log('Evento actualizado en calendario local:', {
-          eventId: originalTask.externalEventId,
-          calendarId: originalTask.externalCalendarId,
-          title: taskName,
-        });
       } catch (e) {
         console.log('Error actualizando evento en calendario local:', e);
       }
@@ -254,10 +240,6 @@ export const saveTaskUtil = async ({
 
   setTasks(newTasks);
   await AsyncStorage.setItem('TASKS', JSON.stringify(newTasks));
-  console.log('Tareas guardadas:', newTasks);
-  console.log('Tarea guardada:', newTask);
-  console.log('workplace:', taskworkplace);
-
 
   // Reset al cerrar el modal tras guardar
   setTaskName('');
@@ -296,7 +278,6 @@ export const deleteTaskUtil = async ({
   if (taskToDelete && taskToDelete.externalEventId && taskToDelete.externalCalendarId) {
     try {
       await Calendar.deleteEventAsync(taskToDelete.externalEventId);
-      console.log('Evento externo borrado:', taskToDelete.externalEventId);
     } catch (e) {
       console.log('Error borrando evento externo:', e);
     }

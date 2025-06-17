@@ -87,7 +87,6 @@ const EdicionCreacion = ({
             // 2. Fuerza el refresco de eventos externos
             if (typeof setRefreshExternalEvents === 'function') {
                 setRefreshExternalEvents(prev => !prev);
-                console.log('Refrescando eventos externos tras edición');
             }
 
             // 3. Actualiza la copia local (si existe)

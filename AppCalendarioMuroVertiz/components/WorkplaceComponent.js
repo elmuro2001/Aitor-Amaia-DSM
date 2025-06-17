@@ -21,7 +21,6 @@ const WorkplaceComponent = ({ selectedWorkplaces, setSelectedWorkplaces }) => {
             if (storedWorkplaces) {
                 const parsedWorkplaces = JSON.parse(storedWorkplaces);
                 setWorkplace(parsedWorkplaces);
-                console.log('Workplaces cargados:', parsedWorkplaces);
             }
         } catch (error) {
             console.error('Error cargando workplaces:', error);
